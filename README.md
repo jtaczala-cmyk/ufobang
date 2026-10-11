@@ -1,0 +1,15 @@
+# Kosmoskjold · Kosmiczna Tarcza · Cosmo Shield
+
+Free mobile-first browser arcade game by Stop60, an original fixed-shooter inspired by the classic arcade alien-invasion genre:
+defend the Earth – a laser cannon at the bottom against a marching fleet of 55 aliens, four erodible shields and a red mystery ship.
+
+- Single self-contained `index.html` (inline JS/CSS, embedded stop60.no fonts, rendered art and QR generator; works offline once loaded)
+- Languages: Norsk (bokmål, default), Polski (`/pl/`), English (`/en/`), flag switch in the header; `?lang=no|pl|en`
+- 5×11 formation that marches side to side, drops a row at each edge and speeds up (also as aliens die); aliens fire back
+- 4 shields with pixel-exact erosion (3 sub-pixels per game pixel) from both sides' shots and from aliens reaching them
+- Red Manta mystery ship (100–500 bonus), 3 lives + extra lives, waves that start lower, score + best score, pause, autosave
+- Touch: ◀ ▶ buttons or drag on the playfield + hold-to-fire button or auto-fire; keyboard on desktop; synthesised sound with mute
+- Free, no ads, no account, no cookies
+
+© 2026 Stop60 — all rights reserved, see LICENSE. Third-party fonts/QR library: see THIRD-PARTY-NOTICES.md.
+- Address: https://stop60.no/skjold/
