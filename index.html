@@ -42,7 +42,7 @@ a{color:var(--teal)}
   background:linear-gradient(180deg,#15130f 0%,var(--bg) 40%)}
 @media (min-width:700px){#app{border-left:1px solid var(--line);border-right:1px solid var(--line)}}
 /* header (same pattern as Ren logikk) */
-#top{display:flex;align-items:center;gap:6px;min-height:48px}
+#top{position:relative;z-index:25;display:flex;align-items:center;gap:6px;min-height:48px}
 .brand{flex:1;min-width:0;display:flex;align-items:center;gap:9px}
 .mark{width:30px;height:30px;flex:0 0 auto;display:block}
 .bname{display:flex;flex-direction:column;min-width:0;line-height:1}
@@ -85,7 +85,7 @@ a{color:var(--teal)}
 #foot{text-align:center;font-size:10.5px;letter-spacing:.03em;color:#78716c;padding-top:4px}
 #foot a{color:var(--mut)}
 /* overlays (same card system as Ren logikk) */
-.ov{position:fixed;inset:0;z-index:20;background:rgba(10,9,8,.86);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:calc(10px + var(--sat)) 12px calc(10px + var(--sab));animation:fade .2s ease-out;touch-action:pan-y}
+.ov{position:fixed;inset:calc(50px + var(--sat)) 0 0 0;z-index:20;background:rgba(10,9,8,.86);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:6px 12px calc(10px + var(--sab));animation:fade .2s ease-out;touch-action:pan-y}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 .card{position:relative;width:100%;max-width:440px;max-height:100%;overflow:auto;-webkit-overflow-scrolling:touch;background:var(--bg2);border:1px solid var(--line);border-radius:18px;padding:18px 16px 16px;box-shadow:0 18px 60px rgba(0,0,0,.6)}
 .card h2{margin:0 0 8px;font:600 26px/1.1 var(--disp);color:var(--ink);text-align:center;letter-spacing:.02em}
@@ -571,7 +571,7 @@ var input = { left: false, right: false, fire: false, targetX: null };
 var keys = { left: false, right: false, fire: false }, btn = { left: false, right: false, fire: false }, drag = null;
 
 /* ---------------- canvas + pre-rendered art ---------------- */
-var cv = $('cv'), ctx = cv.getContext('2d'), K = 1, DPR = 1, cssW = 240, cssH = 320;
+var cv = $('cv'), ctx = cv.getContext('2d'), K = 1, DPR = 1, cssW = 240, cssH = 320, dprCap = 3, perfN = 0, perfT = 0;
 var LW = SK.W, LH = SK.H, GROUND = 306;
 var SPR = {}, IMGS = {}, imgsReady = 0;
 var ART = { blink: { w: 13, glow: [0, -1.2, 3.4, '45,240,230'] }, brumm: { w: 13.6, glow: [0, -1.4, 3.6, '255,214,60'] }, gloppo: { w: 14.2 }, manta: { w: 27 }, cannon: { h: 30 } };
@@ -696,7 +696,7 @@ function updMute() { $('muteBtn').innerHTML = prefs.mute ? '<svg viewBox="0 0 24
 /* ---------------- layout ---------------- */
 function layout() {
   var st = $('stage').getBoundingClientRect(), s = Math.min(st.width / LW, (st.height - 2) / LH);
-  cssW = Math.floor(LW * s); cssH = Math.floor(LH * s); DPR = Math.min(window.devicePixelRatio || 1, 3);
+  cssW = Math.floor(LW * s); cssH = Math.floor(LH * s); DPR = Math.min(window.devicePixelRatio || 1, dprCap);
   cv.style.width = cssW + 'px'; cv.style.height = cssH + 'px'; cv.width = Math.round(cssW * DPR); cv.height = Math.round(cssH * DPR);
   var nk = cv.width / LW; if (Math.abs(nk - K) > .01 || !SPR.blink) { K = nk; prerender(); }
   draw();
@@ -798,6 +798,8 @@ function handle(e) {
 /* ---------------- loop ---------------- */
 function frame(ts) {
   rafOn = false; var dt = lastTs ? Math.min(.05, (ts - lastTs) / 1000) : 0; lastTs = ts;
+  // adaptive resolution: if a slow device can't hold ~60 fps at 3× pixel density, render at 2× (then 1.5×) instead – smoothness first
+  if (running && !paused && dt) { perfN++; perfT += dt; if (perfN >= 90) { if (perfT / perfN > 0.0195 && dprCap > 1.5 && (window.devicePixelRatio || 1) > 1.5) { dprCap = dprCap > 2 ? 2 : 1.5; layout(); } perfN = 0; perfT = 0; } }
   if (running && !paused && g) {
     if (intro > 0) { intro -= dt; if (intro <= 0) hideBanner(); }
     else if (hitStop > 0) hitStop -= dt;
@@ -991,7 +993,7 @@ if (DEBUG) window.SKJOLD = {
   setLives: function (n) { g.lives = n; }, setScore: function (n) { g.score = n; },
   skipIntro: function () { intro = 0; hideBanner(); },
   fps: function (ms) { return new Promise(function (res) { var n = 0, worst = 0, t0 = performance.now(), last = t0; (function f(now) { n++; worst = Math.max(worst, now - last); last = now; if (now - t0 < ms) requestAnimationFrame(f); else res({ fps: n * 1000 / (now - t0), worst: worst }); })(t0); }); },
-  bot: function (on) { window.__bot = on ? BOT : null; }
+  bot: function (on) { window.__bot = on ? BOT : null; }, dpr: function () { return { cap: dprCap, dpr: DPR, w: cv.width }; }
 };
 function BOT(g, SK) { // simple aiming bot (debug only): used by the e2e suite and the promo capture
   function under(x) { return g.bunkers.some(function (b) { return SK.bunkerTrace(b, x, SK.CFG.playerY, b.y - 1); }); }
