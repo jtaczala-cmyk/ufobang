@@ -14,3 +14,9 @@ defend the Earth – a laser cannon at the bottom against a marching fleet of 55
 
 © 2026 Stop60 — all rights reserved, see LICENSE. Third-party fonts/QR library: see THIRD-PARTY-NOTICES.md.
 - Address: https://stop60.no/ufobang/
+
+## Name history / internal keys
+Ufobang was developed as Kosmoskjold / Cosmo Shield / Kosmiczna Tarcza (hidden test address /skjold/, now a noindex redirect from the
+repo jtaczala-cmyk/skjold to /ufobang/). Internally the old key is kept on purpose: leaderboard rows use `game = 'skjold'` with the
+functions `skjold_start` / `skjold_submit` (supabase/supabase_skjold.sql), and the browser storage keys are `skjold_*_v1`, so saved games,
+best scores, leaderboard settings and database rows carry over unchanged. Players never see this key.
