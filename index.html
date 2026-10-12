@@ -3,7 +3,7 @@
 <html lang="nb">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 <meta name="robots" content="noindex,nofollow" />
 <meta name="googlebot" content="noindex,nofollow" />
 <meta name="copyright" content="© 2026 Stop60 · All rights reserved" />
@@ -33,7 +33,7 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font:400 16px/1.5 var(--body);overscroll-behavior:none;-webkit-text-size-adjust:100%}
-body{overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:none}
+body{position:fixed;inset:0;overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:none} /* fixed body: no rubber-band, no pull-to-refresh on iOS */
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation;padding:0}
 button:focus-visible,a:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 a{color:var(--teal)}
@@ -61,7 +61,7 @@ a{color:var(--teal)}
 .hs.hi{text-align:right;align-items:flex-end}.hs.hi b{color:var(--teal2)}
 .hs.wv{align-items:center}.hs.wv b{font-size:16px;color:var(--ink);background:var(--bg2);border:1px solid var(--line);border-radius:999px;padding:4px 10px;margin-top:4px;letter-spacing:.14em}
 /* stage */
-#stage{position:relative;flex:1 1 0;min-height:0;display:grid;place-items:center}
+#stage{position:relative;flex:1 1 0;min-height:0;display:grid;place-items:center;touch-action:none}
 #cv{display:block;border-radius:14px;background:#0b0a09 center bottom/cover no-repeat;box-shadow:0 0 0 1px rgba(255,255,255,.08),0 14px 40px rgba(0,0,0,.55);touch-action:none}
 #lives{position:absolute;left:0;right:0;bottom:6px;display:flex;justify-content:center;gap:4px;pointer-events:none}
 #banner{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%) scale(.96);text-align:center;pointer-events:none;opacity:0;transition:opacity .25s,transform .25s;white-space:nowrap}
@@ -71,7 +71,27 @@ a{color:var(--teal)}
 #toast{position:absolute;left:50%;top:10px;transform:translateX(-50%) translateY(-6px);max-width:calc(100% - 16px);font-size:13px;line-height:1.35;color:var(--ink);background:rgba(18,17,15,.94);border:1px solid rgba(45,212,191,.5);padding:7px 12px;border-radius:12px;text-align:center;pointer-events:none;opacity:0;transition:opacity .25s,transform .25s;z-index:3}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 /* touch controls */
-#ctl{display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:8px;margin-top:8px}
+#ctl{margin-top:8px}
+#btns{display:none;grid-template-columns:1fr 1fr 1.25fr;gap:8px}
+#app.btnmode #btns{display:grid}#app.btnmode #pad{display:none}
+/* one-finger drag pad: touch anywhere here (or on the playfield) and slide; the cannon follows 1:1 and fires while the finger is down */
+#pad{position:relative;height:74px;border-radius:18px;overflow:hidden;touch-action:none;cursor:grab;
+  background:radial-gradient(120% 140% at 50% 0%,rgba(45,212,191,.13),rgba(45,212,191,0) 60%),linear-gradient(180deg,#1f1d19,#161512);
+  border:1px solid rgba(45,212,191,.32);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 4px 14px rgba(0,0,0,.4)}
+#pad::before{content:"";position:absolute;left:14px;right:14px;top:calc(100% - 21px);height:2px;margin-top:-1px;border-radius:2px;background:repeating-linear-gradient(90deg,rgba(153,246,228,.28) 0 6px,transparent 6px 12px)}
+#padKnob{position:absolute;left:0;top:calc(100% - 21px);width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;pointer-events:none;will-change:transform;
+  background:radial-gradient(circle at 38% 32%,#5eead4,#14b8a6 55%,#0f766e);box-shadow:0 0 0 4px rgba(45,212,191,.16),0 6px 14px rgba(0,0,0,.5),inset 0 1px 1px rgba(255,255,255,.5);transition:box-shadow .15s}
+#padKnob::before,#padKnob::after{content:"";position:absolute;top:50%;margin-top:-5px;border:5px solid transparent}
+#padKnob::before{left:-14px;border-right-color:rgba(153,246,228,.75)}#padKnob::after{right:-14px;border-left-color:rgba(153,246,228,.75)}
+#padTxt{position:absolute;left:0;right:0;top:8px;text-align:center;pointer-events:none;transition:opacity .2s}
+#padTxt b{display:block;font:600 12px/1 var(--disp);letter-spacing:.22em;text-transform:uppercase;color:var(--teal2)}
+#padTxt small{display:block;margin-top:3px;font-size:10.5px;line-height:1.2;color:var(--mut)}
+#pad.touch{border-color:var(--teal);cursor:grabbing}#pad.touch #padTxt{opacity:.25}
+#pad.touch #padKnob{box-shadow:0 0 0 7px rgba(45,212,191,.28),0 0 22px rgba(45,212,191,.6),inset 0 1px 1px rgba(255,255,255,.5)}
+#finger{position:fixed;left:0;top:0;width:0;height:0;pointer-events:none;z-index:15;opacity:0;transition:opacity .12s;will-change:transform}
+#finger::before{content:"";position:absolute;left:-30px;top:-30px;width:60px;height:60px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.5) 0 22%,rgba(153,246,228,.22) 23% 60%,rgba(153,246,228,0) 64%);box-shadow:0 0 0 2.5px rgba(255,255,255,.8),0 0 20px 4px rgba(45,212,191,.5)}
+#finger svg{position:absolute;left:-27px;top:-7px;width:62px;height:104px;filter:drop-shadow(0 6px 10px rgba(0,0,0,.55))}
+#finger.on{opacity:1}
 .cb{position:relative;display:flex;align-items:center;justify-content:center;min-height:68px;border-radius:16px;background:linear-gradient(180deg,#24211d,#1a1815);border:1px solid rgba(255,255,255,.16);box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 4px 12px rgba(0,0,0,.35);color:var(--ink);touch-action:none}
 .cb svg{width:30px;height:30px;fill:currentColor}
 .cb.on{background:linear-gradient(180deg,#123a35,#0f2e2a);border-color:var(--teal);color:var(--teal2);transform:scale(.97)}
@@ -81,7 +101,7 @@ a{color:var(--teal)}
 #cFire .af{position:absolute;top:6px;right:8px;font:600 9px/1 var(--disp);letter-spacing:.14em;color:#ffd5d8;opacity:.9}
 #kbd{display:none;text-align:center;font-size:12.5px;color:var(--mut);margin-top:8px}
 #kbd kbd{font:600 11px/1 var(--disp);letter-spacing:.06em;color:var(--ink);background:var(--bg2);border:1px solid rgba(255,255,255,.2);border-bottom-width:2px;border-radius:5px;padding:3px 6px;margin:0 2px}
-@media (hover:hover) and (pointer:fine){#ctl.auto{display:none}#kbd.auto{display:block}}
+@media (hover:hover) and (pointer:fine){#app:not(.btnmode) #ctl.auto{display:none}#kbd.auto{display:block}}
 #foot{text-align:center;font-size:10.5px;letter-spacing:.03em;color:#78716c;padding-top:4px}
 #foot a{color:var(--mut)}
 /* overlays (same card system as Ren logikk) */
@@ -177,7 +197,43 @@ a{color:var(--teal)}
 #dbg{position:fixed;left:4px;bottom:4px;z-index:30;font:10px monospace;background:#200;color:#f88;padding:2px 5px;border-radius:5px;opacity:.7;pointer-events:none}
 @media (max-height:740px){.hart{display:none}#menu .card{padding-top:14px}.pts li{font-size:12.5px}}
 @media (max-height:680px){.pts{display:none}#menu .tbl{margin-top:8px}}
-@media (max-height:600px){#top{min-height:42px}.ibtn{width:36px;height:36px}.cb{min-height:58px}#hud{min-height:32px}.hs b{font-size:19px}}
+@media (max-height:600px){#top{min-height:42px}.ibtn{width:36px;height:36px}.cb{min-height:58px}#pad{height:62px}#hud{min-height:32px}.hs b{font-size:19px}}
+/* online leaderboard (opt-in) */
+.xbtn{position:absolute;right:10px;top:10px;width:40px;height:40px;border-radius:10px;display:grid;place-items:center;background:rgba(0,0,0,.3);border:1px solid var(--line);color:var(--ink);z-index:2}
+.xbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
+.lbbtn svg{width:19px;height:19px;flex:0 0 auto}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:3px;margin:6px 0 8px}
+.tab{min-height:38px;border-radius:9px;font:600 14px/1 var(--disp);letter-spacing:.06em;color:var(--mut)}
+.tab.on{background:var(--teal);color:#06201d}
+.lbl{min-height:120px}
+.lbl ol{list-style:none;margin:0;padding:0}
+.lbl li{display:grid;grid-template-columns:34px 1fr auto auto;gap:8px;align-items:baseline;padding:7px 8px;border-radius:9px;font-size:14.5px}
+.lbl li:nth-child(odd){background:rgba(255,255,255,.035)}
+.lbl li .ps{font:600 15px/1 var(--disp);color:var(--mut);text-align:right}
+.lbl li:nth-child(1) .ps{color:#fbbf24}.lbl li:nth-child(2) .ps{color:#e5e7eb}.lbl li:nth-child(3) .ps{color:#d97706}
+.lbl li .nm{color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.lbl li .wv{font-size:11.5px;color:var(--mut);white-space:nowrap}
+.lbl li .sc{font:600 16px/1 var(--disp);color:var(--teal2);font-variant-numeric:tabular-nums;letter-spacing:.03em}
+.lbl li.me{background:rgba(45,212,191,.16);box-shadow:inset 0 0 0 1px rgba(45,212,191,.55)}
+.lbl .empty{padding:26px 6px;text-align:center;color:var(--mut);font-size:14px}
+.lbnote{text-align:center;font-size:12px!important;color:var(--mut)!important;margin:6px 0 0!important}
+.optin{margin-top:10px;padding:10px 10px 8px;border-radius:12px;background:var(--bg);border:1px solid var(--line);text-align:left}
+.optin .lbl2{display:block;font:500 10.5px/1 var(--disp);letter-spacing:.24em;text-transform:uppercase;color:var(--mut);margin:0 0 5px}
+.nickrow{display:flex;gap:8px}
+.nick{flex:1;min-width:0;height:46px;padding:0 12px;border-radius:11px;background:#0d0c0b;border:1px solid rgba(255,255,255,.22);color:var(--ink);font:500 16px var(--body);outline:none;-webkit-user-select:text;user-select:text;touch-action:manipulation}
+.nick:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(45,212,191,.25)}
+.nickrow .btn{width:auto;margin:0;min-height:46px;padding:0 16px;font-size:16px}
+.nickrow .btn[disabled]{opacity:.45}
+.chk{display:flex;gap:9px;align-items:flex-start;margin:8px 0 0;font-size:13.5px;line-height:1.35;color:var(--txt);cursor:pointer;touch-action:manipulation}
+.chk input{flex:0 0 auto;width:22px;height:22px;margin:0;accent-color:var(--teal)}
+.optin .fine{font-size:11.5px!important;line-height:1.35!important;color:var(--mut)!important;margin:6px 0 0!important}
+.optin .fine a{color:var(--mut)}
+.lbmsg{min-height:1.2em;font-size:13px!important;margin:6px 0 0!important;color:var(--teal2)!important;text-align:left}
+.lbmsg.err{color:#fca5a5!important}
+#over .optin{margin-top:8px}
+#oLbRow{display:flex;justify-content:space-between;align-items:center;gap:8px}
+#oLbOpen{font:600 13px/1 var(--disp);letter-spacing:.06em;color:var(--teal2);padding:8px 2px;white-space:nowrap;text-decoration:underline;text-underline-offset:3px}
+@media (max-height:700px){#overMark{display:none}#overTxt{display:none}#over .stats{margin-top:4px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -198,11 +254,15 @@ a{color:var(--teal)}
   </section>
   <section id="stage"><canvas id="cv" aria-label="Playfield"></canvas><div id="banner"><b id="bnT"></b><small id="bnS"></small></div><div id="toast" role="status" aria-live="polite"></div></section>
   <section id="ctl" class="auto">
+    <div id="pad"><span id="padTxt"><b data-t="padHint">Dra fingeren her</b><small data-t="padSub"></small></span><i id="padKnob"></i></div>
+    <div id="btns">
     <button class="cb" id="cLeft" aria-label="Left"><svg viewBox="0 0 24 24"><path d="M15.5 5.5 8.5 12l7 6.5z"/></svg></button>
     <button class="cb" id="cRight" aria-label="Right"><svg viewBox="0 0 24 24"><path d="M8.5 5.5 15.5 12l-7 6.5z"/></svg></button>
     <button class="cb" id="cFire" aria-label="Fire"><svg viewBox="0 0 24 24"><path d="M12 2.5 15 9h-2v12.5h-2V9H9z"/></svg><span data-t="fire">Skyt</span><i class="af" id="cAf" hidden>AUTO</i></button>
+    </div>
   </section>
   <p id="kbd" class="auto"></p>
+  <i id="finger" aria-hidden="true"><svg viewBox="0 0 62 104"><g fill="#f4efe9" stroke="#b9a99a" stroke-width="1.6" stroke-linejoin="round"><path d="M19 66 7 50c-3-4 1-10 6-7l10 9z"/><rect x="38" y="44" width="15" height="30" rx="7.5"/><rect x="31" y="40" width="15" height="34" rx="7.5"/><path d="M16 58c0-5 3-8 7-8h28c5 0 8 4 8 9v14c0 17-9 31-24 31h-1c-12 0-18-10-18-24z"/><rect x="17" y="0" width="16" height="66" rx="8"/></g><path d="M20 9c0-3 2-5 5-5s5 2 5 5" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="2" stroke-linecap="round"/></svg></i>
   <footer id="foot">© 2026 Stop60 · All rights reserved<span id="fPrivW" hidden> · <a class="privl" id="fPriv" href="personvern/" data-t="privacy">Personvern</a></span></footer>
 </div>
 
@@ -215,8 +275,9 @@ a{color:var(--teal)}
   <button class="btn main" id="mContinue" hidden><span class="bt"><span data-t="continue">Fortsett</span><small id="mContInfo"></small></span></button>
   <button class="btn" id="mNew"><span class="bt"><span data-t="newGame">Nytt spill</span><small data-t="newGameSub">Bølge 1 · 3 liv</small></span></button>
   <button class="tg" id="mAuto" role="switch" aria-checked="false"><span><span data-t="autofire">Autoskyting</span><small data-t="autofireSub">Kanonen skyter av seg selv – du styrer bare</small></span><i class="sw"></i></button>
+  <button class="tg" id="mBtns" role="switch" aria-checked="false"><span><span data-t="btnMode">Knapper i stedet for å dra</span><small data-t="btnModeSub"></small></span><i class="sw"></i></button>
   <div id="mShareRow"><button type="button" class="qrfig" id="mQr"><span class="qrsvg" id="mQrSvg"></span><small data-t="qrLabel">Skann og spill</small></button>
-    <div class="col"><button class="btn tl" id="mShare"><svg class="shico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-t="share">Del spillet</span></button><button class="btn" id="mRules" data-t="howTo">Slik spiller du</button></div></div>
+    <div class="col"><button class="btn tl" id="mShare"><svg class="shico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-t="share">Del spillet</span></button><button class="btn lbbtn" id="mLb"><svg class="shico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7M10 17h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-t="lb">Toppliste</span></button><button class="btn" id="mRules" data-t="howTo">Slik spiller du</button></div></div>
   <p class="mfoot" data-t="free">Laget med lidenskap – gratis for alle</p>
 </div></div>
 
@@ -253,8 +314,19 @@ a{color:var(--teal)}
   <p id="overTxt"></p>
   <div class="stats"><div><b id="osScore">0</b><small data-t="score">Poeng</small></div><div><b id="osWave">1</b><small data-t="waveReached">Bølge</small></div><div><b id="osKills">0</b><small data-t="kills">Romvesener</small></div></div>
   <p id="overBest"></p>
+  <div class="optin" id="oOpt"><label class="lbl2" for="oNick" data-t="nickLbl">Kallenavn</label><div class="nickrow"><input class="nick" id="oNick" type="text" maxlength="16" autocomplete="nickname" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send" /><button class="btn tl" id="oSend" data-t="send">Send</button></div><label class="chk"><input type="checkbox" id="oChk" /><span data-t="optIn">Vis resultatet mitt på topplisten på nett</span></label><p class="fine"><span data-t="optFine"></span> <a class="privl" data-t="privacy" href="personvern/">Personvern</a></p><div id="oLbRow"><p class="lbmsg" id="oMsg" role="status" aria-live="polite"></p><button type="button" id="oLbOpen" data-t="lbSee">Se topplisten</button></div></div>
   <button class="btn main" id="oAgain" data-t="again">Spill igjen</button>
   <div id="overShare"><button type="button" class="qrfig" id="oQr"><span class="qrsvg" id="oQrSvg"></span></button><div class="col"><small data-t="qrShare">Skann og spill – del videre</small><button class="btn tl" id="oShare"><svg class="shico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-t="share">Del spillet</span></button><button class="btn" id="oMenu" data-t="toMenu">Meny</button></div></div>
+</div></div>
+
+<div class="ov" id="lb" hidden><div class="card" id="lbCard">
+  <button class="xbtn" id="lbX" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  <p class="kk" data-t="lbKick">Online</p><h2 data-t="lb">Toppliste</h2>
+  <div class="tabs" role="tablist"><button class="tab on" role="tab" data-tab="all" data-t="tabAll">Topp 50</button><button class="tab" role="tab" data-tab="day" data-t="tabDay">I dag</button><button class="tab" role="tab" data-tab="week" data-t="tabWeek">Denne uka</button></div>
+  <div class="lbl" id="lbList"></div>
+  <p class="lbnote" id="lbNote"></p>
+  <div class="optin" id="lOpt"><label class="lbl2" for="lNick" data-t="nickLbl">Kallenavn</label><div class="nickrow"><input class="nick" id="lNick" type="text" maxlength="16" autocomplete="nickname" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send" /></div><label class="chk"><input type="checkbox" id="lChk" /><span data-t="optIn">Vis resultatet mitt på topplisten på nett</span></label><p class="fine"><span data-t="optFine"></span> <a class="privl" data-t="privacy" href="personvern/">Personvern</a></p><p class="lbmsg" id="lMsg" role="status" aria-live="polite"></p></div>
+  <button class="btn main" id="lbClose" data-t="close2">Lukk</button>
 </div></div>
 
 <div class="ov" id="confirm" hidden><div class="card" style="text-align:center">
@@ -380,7 +452,9 @@ function step(g, input) {
   if (g.state === 'waveEnd') return g; // the page shows the "wave cleared" card and calls nextWave()
   // player
   var mv = (input.right ? 1 : 0) - (input.left ? 1 : 0);
-  if (input.targetX != null) { var d = input.targetX - g.px, mx = CFG.playerSpeed * 1.35 * dt; mv = 0; g.px += Math.max(-mx, Math.min(mx, d)); }
+  if (input.targetX != null) { mv = 0;
+    if (input.follow) g.px = input.targetX; // one-finger drag: the cannon sits exactly where the finger puts it (1:1, no speed limit, clamped below)
+    else { var d = input.targetX - g.px, mx = CFG.playerSpeed * 1.35 * dt; g.px += Math.max(-mx, Math.min(mx, d)); } }
   g.px = Math.max(CFG.playerW / 2 + 2, Math.min(W - CFG.playerW / 2 - 2, g.px + mv * CFG.playerSpeed * dt));
   g.cool -= dt;
   if (input.fire && !g.shot && g.cool <= 0) { g.shot = { x: g.px, y: CFG.playerY - 18 }; /* leaves at the barrel tip */ g.shots++; g.waveShots++; ev(g, 'shoot', { x: g.px }); }
@@ -424,6 +498,14 @@ function playerHit(g) { g.lives--; g.state = 'dead'; g.stateT = CFG.deathTime; g
 function nextWave(g) { if (g.state !== 'waveEnd' && g.state !== 'cleared') return g; g.wave++; newWave(g); ev(g, 'wave', { wave: g.wave }); return g; }
 function drain(g) { var e = g.events; g.events = []; return e; }
 
+/* ---------- leaderboard plausibility (same rules as public.skjold_submit in supabase/supabase_skjold.sql) ---------- */
+function plausible(score, ko, wave, secs) {
+  if (!(wave >= 1 && wave <= 500 && ko >= 0 && score >= 0 && secs >= 0 && secs <= 43200) || score % 10) return false;
+  var k = ko - (wave - 1) * 55; if (k < 0 || k > 55) return false;
+  var amin = (wave - 1) * 990 + 10 * k, amax = (wave - 1) * 990 + 30 * Math.min(k, 11) + 20 * Math.min(Math.max(k - 11, 0), 22) + 10 * Math.max(k - 33, 0);
+  if (score < amin || score > amax + 500 * Math.floor(secs / 14)) return false;
+  return secs >= ko * 0.2 + (wave - 1) * 1.7;
+}
 /* ---------- save / restore (autosave of a game in progress) ---------- */
 function packMask(m) { var s = '', run = 0, cur = m[0]; for (var i = 0; i < m.length; i++) { if (m[i] === cur) run++; else { s += run.toString(36) + ','; run = 1; cur = m[i]; } } return (m[0] ? '1:' : '0:') + s + run.toString(36); }
 function unpackMask(s, len) { var m = new Uint8Array(len), cur = s[0] === '1' ? 1 : 0, i = 0; s.slice(2).split(',').forEach(function (r) { var n = parseInt(r, 36); m.fill(cur, i, i + n); i += n; cur ^= 1; }); return m; }
@@ -443,7 +525,7 @@ function restore(str) {
 var api = { W: W, H: H, DT: DT, SUB: SUB, COLS: COLS, ROWS: ROWS, CELL_X: CELL_X, CELL_Y: CELL_Y, TYPES: TYPES, CFG: CFG,
   create: create, step: step, drain: drain, nextWave: nextWave, alive: alive, alienPos: alienPos, alienBox: alienBox, bounds: bounds, stepInterval: stepInterval,
   bombSpeed: bombSpeed, maxBombs: maxBombs, makeBunkers: makeBunkers, bunkerAt: bunkerAt, bunkerTrace: bunkerTrace, carve: carve, solidCount: solidCount,
-  snapshot: snapshot, restore: restore, packMask: packMask, unpackMask: unpackMask, rnd: rnd, mysteryPoints: mysteryPoints, newWave: newWave, marchStep: marchStep, playerHit: playerHit };
+  snapshot: snapshot, restore: restore, plausible: plausible, packMask: packMask, unpackMask: unpackMask, rnd: rnd, mysteryPoints: mysteryPoints, newWave: newWave, marchStep: marchStep, playerHit: playerHit };
 return api;
 })();
 (function () {
@@ -458,8 +540,8 @@ var $ = function (id) { return document.getElementById(id); };
 var LANGS = ['no', 'pl', 'en'], LANG_NAME = { no: 'Norsk', pl: 'Polski', en: 'English' };
 function normLang(l) { l = String(l || '').toLowerCase(); if (/^(nb|nn|no)\b/.test(l)) return 'no'; if (/^pl\b/.test(l)) return 'pl'; if (/^en\b/.test(l)) return 'en'; return null; }
 function browserLang() { var ls = (navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || '']); for (var i = 0; i < ls.length; i++) { var l = normLang(ls[i]); if (l) return l; } return 'no'; }
-var prefs = { lang: browserLang(), mute: false, auto: false };
-try { var pr = JSON.parse(localStorage.getItem(PREF_KEY) || 'null'); if (pr) { if (normLang(pr.lang)) prefs.lang = normLang(pr.lang); prefs.mute = !!pr.mute; prefs.auto = !!pr.auto; } } catch (e) {}
+var prefs = { lang: browserLang(), mute: false, auto: false, btns: false }; // btns: optional ◀ ▶ + Fire buttons instead of the one-finger drag pad
+try { var pr = JSON.parse(localStorage.getItem(PREF_KEY) || 'null'); if (pr) { if (normLang(pr.lang)) prefs.lang = normLang(pr.lang); prefs.mute = !!pr.mute; prefs.auto = !!pr.auto; prefs.btns = !!pr.btns; } } catch (e) {}
 if (LANGDIR && !(function () { try { return localStorage.getItem(PREF_KEY); } catch (e) { return null; } })()) prefs.lang = LANGDIR;
 (function () { var m = /[?&]lang=([a-z]{2})/i.exec(location.search); if (m && normLang(m[1])) prefs.lang = normLang(m[1]); })();
 function savePrefs() { try { localStorage.setItem(PREF_KEY, JSON.stringify(prefs)); } catch (e) {} }
@@ -475,15 +557,21 @@ function rules(o) { // o = per-language texts -> how-to-play cards (same card-pe
     + '<p class="about">' + o.about + '</p><p class="about">© 2026 Stop60. All rights reserved.</p>';
 }
 var PTS = {
-  no: [['Klassisk arkade', 'Stopp invasjonen bølge for bølge: 55 romvesener, fire skjold og én laserkanon.'], ['Korte runder', 'En bølge tar omtrent ett minutt, og spillet lagres automatisk.'], ['Overalt', 'Knapper eller fingeren på mobilen, tastaturet på PC.']],
-  pl: [['Klasyka automatów', 'Powstrzymaj inwazję fala po fali: 55 kosmitów, cztery tarcze i jedno działo laserowe.'], ['Krótkie rundy', 'Jedna fala trwa około minuty, a gra zapisuje się sama.'], ['Wszędzie', 'Przyciski albo palec na telefonie, klawiatura na komputerze.']],
-  en: [['Arcade classic', 'Stop the invasion wave by wave: 55 aliens, four shields and one laser cannon.'], ['Short rounds', 'A wave takes about a minute, and the game saves itself.'], ['Anywhere', 'Buttons or your finger on a phone, the keyboard on a computer.']]
+  no: [['Klassisk arkade', 'Stopp invasjonen bølge for bølge: 55 romvesener, fire skjold og én laserkanon.'], ['Korte runder', 'En bølge tar omtrent ett minutt, og spillet lagres automatisk.'], ['Én finger', 'Dra med én finger på mobilen – kanonen skyter mens du holder. Tastatur på PC, toppliste på nett hvis du vil.']],
+  pl: [['Klasyka automatów', 'Powstrzymaj inwazję fala po fali: 55 kosmitów, cztery tarcze i jedno działo laserowe.'], ['Krótkie rundy', 'Jedna fala trwa około minuty, a gra zapisuje się sama.'], ['Jeden palec', 'Przesuwaj jednym palcem – działo strzela, gdy trzymasz. Klawiatura na komputerze, ranking online, jeśli chcesz.']],
+  en: [['Arcade classic', 'Stop the invasion wave by wave: 55 aliens, four shields and one laser cannon.'], ['Short rounds', 'A wave takes about a minute, and the game saves itself.'], ['One finger', 'Drag with one finger on a phone – the cannon fires while you hold. Keyboard on a computer, an online leaderboard if you like.']]
 };
 var T = {
   no: { name: 'Kosmoskjold', tagline: 'Forsvar jorden', test: 'TESTVERSJON', privacy: 'Personvern', sndLbl: 'Lyd', howTo: 'Slik spiller du', toMenu: 'Meny', close: 'Skjønner', pauseLbl: 'Pause',
     score: 'Poeng', wave: 'Bølge', hi: 'Rekord', fire: 'Skyt', livesLbl: 'Liv igjen', accuracy: 'Treffsikkerhet', waveReached: 'Bølge', kills: 'Romvesener',
     continue: 'Fortsett spillet', contInfo: 'Bølge {w} · {s} poeng · {l} liv', newGame: 'Nytt spill', newGameSub: 'Bølge 1 · 3 liv', best: 'Rekord: {s} poeng · beste bølge: {w}', bestNone: 'Ingen rekord ennå – lykke til!',
-    autofire: 'Autoskyting', autofireSub: 'Kanonen skyter av seg selv – du styrer bare', free: 'Laget med lidenskap – gratis for alle',
+    padHint: 'Dra fingeren her', padSub: 'Kanonen følger fingeren og skyter mens du holder', btnMode: 'Knapper i stedet for å dra', btnModeSub: '◀ ▶ og en Skyt-knapp under brettet',
+    lb: 'Toppliste', lbKick: 'På nett', tabAll: 'Topp 50', tabDay: 'I dag', tabWeek: 'Denne uka', lbSee: 'Se topplisten', lbLoading: 'Laster …', lbEmpty: 'Ingen resultater her ennå – bli den første!', lbDown: 'Topplisten kan ikke nås akkurat nå. Spillet virker som vanlig.',
+    lbNote: 'Beste resultat per kallenavn.', lbWaveN: 'bølge {w}', nickLbl: 'Kallenavn', nickPh: 'f.eks. Romvakt', optIn: 'Vis resultatet mitt på topplisten på nett', optFine: 'Kallenavn, poeng og bølge blir offentlige. Ikke bruk ekte navn eller e-post.',
+    send: 'Send', sending: 'Sender …', sentRank: 'Lagt inn! Du er nr. {r} på topplisten.', sentOk: 'Lagt inn på topplisten!', lbQueued: 'Fikk ikke sendt nå – vi prøver igjen automatisk.', lbRejected: 'Topplisten godtok ikke dette resultatet.', lbRate: 'Litt for raskt – prøv igjen om et halvt minutt.',
+    needOpt: 'Kryss av for topplisten først.', lbNoScore: 'Ingen poeng å sende i denne runden.', lbOffHint: 'Vil du være med? Skriv et kallenavn og kryss av – da sendes resultatet etter hvert spill.', lbOnHint: 'Du er med: resultatet sendes etter hvert spill.',
+    nickShort: 'Skriv et kallenavn (2–16 tegn).', nickChars: 'Tillatt: bokstaver, tall, mellomrom og . _ \' - (start med bokstav eller tall).', nickBad: 'Det kallenavnet er ikke tillatt – velg et annet.',
+    autofire: 'Autoskyting', autofireSub: 'For knapper og tastatur: kanonen skyter av seg selv', free: 'Laget med lidenskap – gratis for alle',
     qrLabel: 'Skann og spill', qrShare: 'Skann og spill – del videre', share: 'Del spillet', shareTxt: 'Skann koden med kameraet på telefonen for å åpne spillet.', shareBtn: 'Del …', copy: 'Kopier lenke', copied: 'Kopiert!', close2: 'Lukk',
     paused: 'Pause', pausedT: 'Spillet står stille', resume: 'Fortsett',
     waveBanner: 'Bølge {w}', ready: 'Gjør deg klar!', cleared: 'Bølge {w} slått tilbake!', winTxt: 'Jorden er trygg – for nå. Neste bølge starter litt lavere og skyter mer.', nextWave: 'Neste bølge', nextSub: 'Bølge {w}',
@@ -492,17 +580,24 @@ var T = {
     kbd: '<kbd>←</kbd><kbd>→</kbd> flytt · <kbd>Mellomrom</kbd> skyt · <kbd>P</kbd> pause · <kbd>M</kbd> lyd', p: 'p.', fieldLbl: 'Spillebrettet: romvesener øverst, fire skjold og laserkanonen nederst',
     rulesHtml: rules({ name: 'Kosmoskjold', h: 'Slik spiller du', manta: 'Rødmanta', p: 'poeng',
       goalH: 'Mål', goal: 'Forsvar jorden mot en invasjon fra verdensrommet: skyt ned alle 55 romvesenene før de lander.',
-      secs: [['Kontroller', ['<b>Mobil:</b> trykk på ◀ ▶ eller dra fingeren over spillebrettet. Hold inne <b>Skyt</b> – eller slå på autoskyting i menyen.', '<b>PC:</b> ← → eller A/D flytter, mellomrom skyter, P pauser, M slår lyden av og på.', 'Laserkanonen har ett skudd i luften om gangen: sikt godt.']],
+      secs: [['Kontroller', ['<b>Mobil – én finger:</b> legg fingeren hvor som helst nederst (på brettet eller i feltet under) og dra til siden. Kanonen følger fingeren direkte, og den skyter av seg selv så lenge fingeren ligger på skjermen. Løft fingeren for å slutte å skyte.', '<b>Knapper:</b> liker du ◀ ▶ og en Skyt-knapp bedre, slå på «Knapper i stedet for å dra» i menyen.', '<b>PC:</b> ← → eller A/D flytter, mellomrom skyter, P pauser, M slår lyden av og på.', 'Laserkanonen har ett skudd i luften om gangen: sikt godt.']],
         ['Romvesenene', ['55 romvesener i 5 rader à 11. Hele flåten marsjerer sakte fra side til side.', 'Når den når kanten, flytter den seg én rad ned og øker farten. Jo færre som er igjen, desto raskere går det.', 'Romvesenene skyter tilbake – skuddene dine kan treffe og stoppe skuddene deres.'], true],
         ['Skjoldene', 'Fire grønne skjold beskytter kanonen. De slites ned bit for bit av skudd fra begge sider, og romvesener som kommer helt ned, spiser dem. Nye skjold kommer for hver bølge.'],
         ['Rødmantaen', 'Av og til flyr et rødt mysterieskip over toppen. Treffer du det, får du 100–500 bonuspoeng.'],
         ['Poeng og liv', ['Blink 30, Brumm 20 og Gloppo 10 poeng.', 'Du har 3 liv. Ekstra liv ved 1 500 poeng og deretter for hver 5 000.', 'Hver ny bølge starter litt lavere. Spillet er over når du mister alle liv eller romvesenene når kanonen.']],
+        ['Toppliste på nett', 'Vil du konkurrere? Skriv et kallenavn og kryss av for «Vis resultatet mitt på topplisten på nett» (det er av til du slår det på). Da sendes kallenavn, poeng, bølge og antall romvesener etter hvert spill, og du kan se topp 50 – totalt, i dag og denne uka. Spillet virker helt uten topplisten.'],
         ['Lagring', 'Spillet lagres automatisk på enheten, sammen med rekorden din. Når siden er lastet, virker spillet også uten nett.']],
       about: 'Kosmoskjold er inspirert av de klassiske arkadespillene om romvesen-invasjoner. Laget med lidenskap og gratis for alle – ingen reklame og ingen konto.' }) },
   pl: { name: 'Kosmiczna Tarcza', tagline: 'Obroń Ziemię', test: 'WERSJA TESTOWA', privacy: 'Prywatność', sndLbl: 'Dźwięk', howTo: 'Jak grać', toMenu: 'Menu', close: 'Rozumiem', pauseLbl: 'Pauza',
     score: 'Punkty', wave: 'Fala', hi: 'Rekord', fire: 'Strzał', livesLbl: 'Życia', accuracy: 'Celność', waveReached: 'Fala', kills: 'Kosmici',
     continue: 'Kontynuuj grę', contInfo: 'Fala {w} · {s} pkt · życia: {l}', newGame: 'Nowa gra', newGameSub: 'Fala 1 · 3 życia', best: 'Rekord: {s} pkt · najlepsza fala: {w}', bestNone: 'Jeszcze bez rekordu – powodzenia!',
-    autofire: 'Autostrzał', autofireSub: 'Działo strzela samo – ty tylko sterujesz', free: 'Stworzone z pasji – za darmo dla wszystkich',
+    padHint: 'Przesuwaj palcem tutaj', padSub: 'Działo podąża za palcem i strzela, gdy trzymasz', btnMode: 'Przyciski zamiast przesuwania', btnModeSub: '◀ ▶ i przycisk Strzał pod planszą',
+    lb: 'Ranking', lbKick: 'Online', tabAll: 'Top 50', tabDay: 'Dziś', tabWeek: 'Ten tydzień', lbSee: 'Zobacz ranking', lbLoading: 'Wczytuję…', lbEmpty: 'Jeszcze brak wyników – bądź pierwszy!', lbDown: 'Ranking jest teraz niedostępny. Gra działa normalnie.',
+    lbNote: 'Najlepszy wynik każdego nicku.', lbWaveN: 'fala {w}', nickLbl: 'Nick', nickPh: 'np. Gwiezdny', optIn: 'Pokaż mój wynik w rankingu online', optFine: 'Nick, punkty i fala będą publiczne. Nie używaj imienia i nazwiska ani e-maila.',
+    send: 'Wyślij', sending: 'Wysyłam…', sentRank: 'Wysłano! Jesteś na {r}. miejscu w rankingu.', sentOk: 'Wysłano do rankingu!', lbQueued: 'Nie udało się teraz wysłać – spróbujemy ponownie automatycznie.', lbRejected: 'Ranking nie przyjął tego wyniku.', lbRate: 'Trochę za szybko – spróbuj za pół minuty.',
+    needOpt: 'Najpierw zaznacz pole rankingu.', lbNoScore: 'W tej rundzie nie ma punktów do wysłania.', lbOffHint: 'Chcesz dołączyć? Wpisz nick i zaznacz pole – wynik będzie wysyłany po każdej grze.', lbOnHint: 'Bierzesz udział: wynik jest wysyłany po każdej grze.',
+    nickShort: 'Wpisz nick (2–16 znaków).', nickChars: 'Dozwolone: litery, cyfry, spacja i . _ \' - (na początku litera lub cyfra).', nickBad: 'Ten nick jest niedozwolony – wybierz inny.',
+    autofire: 'Autostrzał', autofireSub: 'Przy przyciskach i klawiaturze: działo strzela samo', free: 'Stworzone z pasji – za darmo dla wszystkich',
     qrLabel: 'Zeskanuj i graj', qrShare: 'Zeskanuj i graj – podaj dalej', share: 'Udostępnij grę', shareTxt: 'Zeskanuj kod aparatem telefonu, aby otworzyć grę.', shareBtn: 'Udostępnij…', copy: 'Kopiuj link', copied: 'Skopiowano!', close2: 'Zamknij',
     paused: 'Pauza', pausedT: 'Gra wstrzymana', resume: 'Graj dalej',
     waveBanner: 'Fala {w}', ready: 'Przygotuj się!', cleared: 'Fala {w} odparta!', winTxt: 'Ziemia jest bezpieczna – na razie. Następna fala zacznie trochę niżej i będzie strzelać częściej.', nextWave: 'Następna fala', nextSub: 'Fala {w}',
@@ -511,17 +606,24 @@ var T = {
     kbd: '<kbd>←</kbd><kbd>→</kbd> ruch · <kbd>Spacja</kbd> strzał · <kbd>P</kbd> pauza · <kbd>M</kbd> dźwięk', p: 'pkt', fieldLbl: 'Plansza: kosmici u góry, cztery tarcze i działo laserowe na dole',
     rulesHtml: rules({ name: 'Kosmiczna Tarcza', h: 'Jak grać', manta: 'Czerwona Manta', p: 'pkt',
       goalH: 'Cel', goal: 'Obroń Ziemię przed inwazją z kosmosu: zestrzel wszystkich 55 kosmitów, zanim wylądują.',
-      secs: [['Sterowanie', ['<b>Telefon:</b> naciskaj ◀ ▶ albo przesuwaj palcem po planszy. Przytrzymaj <b>Strzał</b> – albo włącz autostrzał w menu.', '<b>Komputer:</b> ← → lub A/D – ruch, spacja – strzał, P – pauza, M – dźwięk.', 'Działo laserowe ma w powietrzu jeden pocisk naraz: celuj starannie.']],
+      secs: [['Sterowanie', ['<b>Telefon – jeden palec:</b> połóż palec w dowolnym miejscu na dole (na planszy lub w polu pod nią) i przesuwaj w bok. Działo podąża bezpośrednio za palcem i strzela samo, dopóki palec dotyka ekranu. Podnieś palec, żeby przestać strzelać.', '<b>Przyciski:</b> jeśli wolisz ◀ ▶ i przycisk Strzał, włącz w menu „Przyciski zamiast przesuwania”.', '<b>Komputer:</b> ← → lub A/D – ruch, spacja – strzał, P – pauza, M – dźwięk.', 'Działo laserowe ma w powietrzu jeden pocisk naraz: celuj starannie.']],
         ['Kosmici', ['55 kosmitów w 5 rzędach po 11. Cała flota maszeruje powoli z boku na bok.', 'Gdy dotrze do krawędzi, schodzi o jeden rząd niżej i przyspiesza. Im mniej ich zostało, tym szybciej się poruszają.', 'Kosmici strzelają – twoje pociski mogą trafić i zatrzymać ich pociski.'], true],
         ['Tarcze', 'Cztery zielone tarcze osłaniają działo. Kruszą się kawałek po kawałku od strzałów obu stron, a kosmici, którzy zejdą nisko, zjadają je. Z każdą falą pojawiają się nowe tarcze.'],
         ['Czerwona Manta', 'Od czasu do czasu u góry przelatuje czerwony tajemniczy statek. Trafienie daje 100–500 punktów bonusu.'],
         ['Punkty i życia', ['Blink 30, Brumm 20, Gloppo 10 punktów.', 'Masz 3 życia. Dodatkowe życie przy 1500 punktach, potem co 5000.', 'Każda nowa fala zaczyna trochę niżej. Gra kończy się, gdy stracisz wszystkie życia albo kosmici dotrą do działa.']],
+        ['Ranking online', 'Chcesz rywalizować? Wpisz nick i zaznacz „Pokaż mój wynik w rankingu online” (domyślnie wyłączone). Wtedy po każdej grze wysyłane są nick, punkty, fala i liczba kosmitów, a ty widzisz top 50 – ogółem, dziś i w tym tygodniu. Gra działa w pełni bez rankingu.'],
         ['Zapis', 'Gra zapisuje się automatycznie na tym urządzeniu, razem z twoim rekordem. Po załadowaniu strony działa też bez internetu.']],
       about: 'Kosmiczna Tarcza jest inspirowana klasycznymi grami zręcznościowymi o inwazji kosmitów. Stworzona z pasji i darmowa dla wszystkich – bez reklam i bez konta.' }) },
   en: { name: 'Cosmo Shield', tagline: 'Defend the Earth', test: 'TEST VERSION', privacy: 'Privacy', sndLbl: 'Sound', howTo: 'How to play', toMenu: 'Menu', close: 'Got it', pauseLbl: 'Pause',
     score: 'Score', wave: 'Wave', hi: 'Best', fire: 'Fire', livesLbl: 'Lives left', accuracy: 'Accuracy', waveReached: 'Wave', kills: 'Aliens',
     continue: 'Continue game', contInfo: 'Wave {w} · {s} points · {l} lives', newGame: 'New game', newGameSub: 'Wave 1 · 3 lives', best: 'Best: {s} points · best wave: {w}', bestNone: 'No best score yet – good luck!',
-    autofire: 'Auto-fire', autofireSub: 'The cannon fires by itself – you just steer', free: 'Made with passion – free for everyone',
+    padHint: 'Drag your finger here', padSub: 'The cannon follows your finger and fires while you hold', btnMode: 'Buttons instead of dragging', btnModeSub: '◀ ▶ and a Fire button below the playfield',
+    lb: 'Leaderboard', lbKick: 'Online', tabAll: 'Top 50', tabDay: 'Today', tabWeek: 'This week', lbSee: 'See the leaderboard', lbLoading: 'Loading…', lbEmpty: 'No scores here yet – be the first!', lbDown: 'The leaderboard can’t be reached right now. The game works as usual.',
+    lbNote: 'Best score per nickname.', lbWaveN: 'wave {w}', nickLbl: 'Nickname', nickPh: 'e.g. StarGuard', optIn: 'Show my score on the online leaderboard', optFine: 'Nickname, score and wave become public. Don’t use your real name or e-mail.',
+    send: 'Post', sending: 'Sending…', sentRank: 'Posted! You are #{r} on the leaderboard.', sentOk: 'Posted to the leaderboard!', lbQueued: 'Couldn’t send it now – we’ll retry automatically.', lbRejected: 'The leaderboard didn’t accept this score.', lbRate: 'A bit too fast – try again in half a minute.',
+    needOpt: 'Tick the leaderboard box first.', lbNoScore: 'No points to post from this round.', lbOffHint: 'Want in? Enter a nickname and tick the box – your score is then posted after each game.', lbOnHint: 'You’re in: your score is posted after each game.',
+    nickShort: 'Enter a nickname (2–16 characters).', nickChars: 'Allowed: letters, digits, spaces and . _ \' - (start with a letter or digit).', nickBad: 'That nickname isn’t allowed – pick another one.',
+    autofire: 'Auto-fire', autofireSub: 'For buttons and keyboard: the cannon fires by itself', free: 'Made with passion – free for everyone',
     qrLabel: 'Scan & play', qrShare: 'Scan & play – pass it on', share: 'Share the game', shareTxt: 'Scan the code with your phone camera to open the game.', shareBtn: 'Share…', copy: 'Copy link', copied: 'Copied!', close2: 'Close',
     paused: 'Paused', pausedT: 'The game is on hold', resume: 'Resume',
     waveBanner: 'Wave {w}', ready: 'Get ready!', cleared: 'Wave {w} repelled!', winTxt: 'Earth is safe – for now. The next wave starts a little lower and fires more often.', nextWave: 'Next wave', nextSub: 'Wave {w}',
@@ -530,11 +632,12 @@ var T = {
     kbd: '<kbd>←</kbd><kbd>→</kbd> move · <kbd>Space</kbd> fire · <kbd>P</kbd> pause · <kbd>M</kbd> sound', p: 'pts', fieldLbl: 'Playfield: aliens at the top, four shields and the laser cannon at the bottom',
     rulesHtml: rules({ name: 'Cosmo Shield', h: 'How to play', manta: 'Red Manta', p: 'points',
       goalH: 'Goal', goal: 'Defend the Earth from an invasion from space: shoot down all 55 aliens before they land.',
-      secs: [['Controls', ['<b>Phone:</b> press ◀ ▶ or drag your finger across the playfield. Hold <b>Fire</b> – or switch on auto-fire in the menu.', '<b>Computer:</b> ← → or A/D to move, Space to fire, P to pause, M for sound.', 'Your laser cannon has one shot in the air at a time: aim well.']],
+      secs: [['Controls', ['<b>Phone – one finger:</b> put your finger anywhere in the lower part (on the playfield or the strip below it) and slide sideways. The cannon follows your finger directly and fires by itself as long as your finger is on the screen. Lift it to stop firing.', '<b>Buttons:</b> if you prefer ◀ ▶ and a Fire button, switch on “Buttons instead of dragging” in the menu.', '<b>Computer:</b> ← → or A/D to move, Space to fire, P to pause, M for sound.', 'Your laser cannon has one shot in the air at a time: aim well.']],
         ['The aliens', ['55 aliens in 5 rows of 11. The whole fleet marches slowly from side to side.', 'When it reaches an edge, it drops one row and speeds up. The fewer are left, the faster they move.', 'The aliens shoot back – your shots can hit and stop theirs.'], true],
         ['The shields', 'Four green shields protect your cannon. They wear away bit by bit from both sides’ shots, and aliens that get low enough eat them. You get new shields every wave.'],
         ['The Red Manta', 'Now and then a red mystery ship flies across the top. Hit it for 100–500 bonus points.'],
         ['Points and lives', ['Blink 30, Brumm 20 and Gloppo 10 points.', 'You have 3 lives. Extra life at 1,500 points, then every 5,000.', 'Each new wave starts a little lower. The game is over when you lose all lives or the aliens reach your cannon.']],
+        ['Online leaderboard', 'Want to compete? Enter a nickname and tick “Show my score on the online leaderboard” (it is off until you switch it on). Your nickname, score, wave and number of aliens are then posted after each game, and you can see the top 50 – all time, today and this week. The game works fully without the leaderboard.'],
         ['Saving', 'The game saves itself on your device, together with your best score. Once the page has loaded, it also works offline.']],
       about: 'Cosmo Shield is inspired by the classic arcade games about alien invasions. Made with passion and free for everyone – no ads and no account.' }) }
 };
@@ -558,6 +661,8 @@ function applyLang() {
   $('fPrivW').hidden = !privOn; $('fPriv').href = privHref;
   $('rulesCard').innerHTML = t('rulesHtml') + '<button class="btn main" id="rClose">' + t('close') + '</button>' + (privOn ? '<p class="rpriv">© 2026 Stop60 · <a class="privl" id="rPriv" href="' + privHref + '">' + t('privacy') + '</a></p>' : '');
   $('rClose').onclick = function () { hide('rules'); };
+  document.querySelectorAll('.nick').forEach(function (el) { el.placeholder = t('nickPh'); });
+  document.querySelectorAll('.optin a.privl').forEach(function (el) { el.href = privHref; });
 }
 /* ---------------- state ---------------- */
 var g = null, running = false, paused = false, intro = 0, acc = 0, lastTs = 0, rafOn = false, overTimer = 0, saveT = 0, shake = 0, flash = 0, hitStop = 0;
@@ -567,7 +672,7 @@ function saveStats() { try { localStorage.setItem(STAT_KEY, JSON.stringify(stats
 function saveGame() { if (!g || g.over) return; try { localStorage.setItem(SAVE_KEY, SK.snapshot(g)); } catch (e) {} }
 function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) {} }
 function loadSave() { try { var s = localStorage.getItem(SAVE_KEY); return s ? SK.restore(s) : null; } catch (e) { return null; } }
-var input = { left: false, right: false, fire: false, targetX: null };
+var input = { left: false, right: false, fire: false, targetX: null, follow: false };
 var keys = { left: false, right: false, fire: false }, btn = { left: false, right: false, fire: false }, drag = null;
 
 /* ---------------- canvas + pre-rendered art ---------------- */
@@ -699,7 +804,7 @@ function layout() {
   cssW = Math.floor(LW * s); cssH = Math.floor(LH * s); DPR = Math.min(window.devicePixelRatio || 1, dprCap);
   cv.style.width = cssW + 'px'; cv.style.height = cssH + 'px'; cv.width = Math.round(cssW * DPR); cv.height = Math.round(cssH * DPR);
   var nk = cv.width / LW; if (Math.abs(nk - K) > .01 || !SPR.blink) { K = nk; prerender(); }
-  draw();
+  draw(); knobX = -1; updKnob();
 }
 
 /* ---------------- render ---------------- */
@@ -802,13 +907,13 @@ function frame(ts) {
   // adaptive resolution: if a slow device can't hold ~60 fps at 3× pixel density, render at 2× (then 1.5×) instead – smoothness first
   if (running && !paused && dt && !manual) { perfN++; perfT += dt; if (perfN >= 90) { if (perfT / perfN > 0.0195 && dprCap > 1.5 && (window.devicePixelRatio || 1) > 1.5) { dprCap = dprCap > 2 ? 2 : 1.5; layout(); } perfN = 0; perfT = 0; } }
   if (running && !paused && g) {
-    if (intro > 0) { intro -= dt; if (intro <= 0) hideBanner(); }
+    if (intro > 0) { intro -= dt; if (intro <= 0) hideBanner(); if (DEBUG && window.__finger) readInput(); if (drag && g.state === 'play') { var bb = pxBounds(); g.px = Math.max(bb[0], Math.min(bb[1], drag.x)); } } // the finger already steers during "Get ready"
     else if (hitStop > 0) hitStop -= dt;
     else { acc += dt; var n = 0; readInput(); while (acc >= SK.DT && n < 8) { SK.step(g, input); acc -= SK.DT; n++; var ev = SK.drain(g); for (var i = 0; i < ev.length; i++) handle(ev[i]); if (!running) break; } if (n >= 8) acc = 0; }
     saveT += dt; if (saveT > 2.5) { saveT = 0; if (g.state === 'play') saveGame(); }
     updHud();
   }
-  fx(dt); draw(ts);
+  fx(dt); draw(ts); updKnob();
   if ((running && !paused) || fxActive()) req();
 }
 var manual = false, vtime = 0; // debug/recording: frames are driven by SKJOLD.tick() instead of requestAnimationFrame
@@ -822,9 +927,11 @@ function fx(dt) {
 }
 function fxActive() { for (var i = 0; i < PN; i += 1) if (P.l[i] > 0) return true; return shake > 0 || flash > 0 || bnLeft > 0 || toLeft > 0; }
 function readInput() {
-  input.left = keys.left || btn.left; input.right = keys.right || btn.right; input.fire = keys.fire || btn.fire || prefs.auto || (DEBUG && window.__bot ? false : false);
-  input.targetX = drag ? drag.x : null;
-  if (DEBUG && window.__bot && g) { var b = window.__bot(g, SK); input.left = false; input.right = false; input.targetX = b.targetX; input.fire = b.fire; }
+  if (DEBUG && window.__finger && g) fingerBot();                                  // promo/e2e: a simulated finger on the drag pad
+  input.left = keys.left || btn.left; input.right = keys.right || btn.right;
+  input.fire = keys.fire || btn.fire || prefs.auto || !!drag;                         // one-finger control: fires while the finger is down
+  input.targetX = drag ? drag.x : null; input.follow = !!drag;                       // ... and the cannon sits exactly under the finger (1:1)
+  if (DEBUG && window.__bot && !window.__finger && g) { var b = window.__bot(g, SK); input.left = false; input.right = false; input.targetX = b.targetX; input.follow = false; input.fire = b.fire; }
 }
 var lastHud = '';
 function updHud() {
@@ -841,12 +948,12 @@ function toast(s) { var el = $('toast'); el.textContent = s; el.classList.add('s
 /* ---------------- game flow ---------------- */
 function startGame(fresh, wave) {
   audioInit(); hideAll();
-  if (fresh || !g) { g = SK.create({ seed: DEBUG && /[?&]seed=(\d+)/.test(location.search) ? +RegExp.$1 : Date.now(), wave: wave || 1 }); stats.games++; saveStats(); track('start'); }
-  running = true; paused = false; acc = 0; lastTs = 0; intro = 1.1; drag = null; bunkerCache = [];
+  if (fresh || !g) { g = SK.create({ seed: DEBUG && /[?&]seed=(\d+)/.test(location.search) ? +RegExp.$1 : Date.now(), wave: wave || 1 }); stats.games++; saveStats(); track('start'); lbRunStart(g); }
+  running = true; paused = false; acc = 0; lastTs = 0; intro = 1.1; reanchor(); bunkerCache = [];
   banner(t('waveBanner', { w: g.wave }), t('ready')); sfx('start'); saveGame(); updHud(); req();
 }
 function nextWave() { SK.nextWave(g); bunkerCache = []; hideAll(); running = true; paused = false; intro = 1.1; acc = 0; lastTs = 0; banner(t('waveBanner', { w: g.wave }), t('ready')); sfx('start'); saveGame(); updHud(); req(); }
-function pauseGame(show) { if (!running || paused) { if (show && running) showPause(); return; } paused = true; ufoStop(); saveGame(); keys.left = keys.right = keys.fire = false; btn.left = btn.right = btn.fire = false; drag = null; setBtns(); if (show) showPause(); }
+function pauseGame(show) { if (!running || paused) { if (show && running) showPause(); return; } paused = true; ufoStop(); saveGame(); keys.left = keys.right = keys.fire = false; btn.left = btn.right = btn.fire = false; dragEnd(); setBtns(); if (show) showPause(); }
 function resumeGame() { if (!running) return; hide('pause'); paused = false; lastTs = 0; acc = 0; if (g && g.mystery && !prefs.mute) ufoStart(); req(); }
 function showPause() { $('pTitle').textContent = t('pausedT'); show('pause'); }
 function gameOver() {
@@ -858,29 +965,72 @@ function gameOver() {
 /* ---------------- input ---------------- */
 function keyMap(k) { return k === 'ArrowLeft' || k === 'a' || k === 'A' ? 'left' : k === 'ArrowRight' || k === 'd' || k === 'D' ? 'right' : k === ' ' || k === 'Spacebar' || k === 'ArrowUp' || k === 'w' || k === 'W' ? 'fire' : null; }
 document.addEventListener('keydown', function (e) {
+  if (e.target && e.target.tagName === 'INPUT') { if (e.key === 'Escape') e.target.blur(); return; } // typing a nickname: no game keys
   audioInit();
   var ov = openOverlay();
-  if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') { if (ov === 'pause') resumeGame(); else if (ov === 'rules' || ov === 'share' || ov === 'confirm') hide(ov); else if (!ov) pauseGame(true); e.preventDefault(); return; }
+  if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') { if (ov === 'pause') resumeGame(); else if (ov === 'rules' || ov === 'share' || ov === 'confirm' || ov === 'lb') hide(ov); else if (!ov) pauseGame(true); e.preventDefault(); return; }
   if (e.key === 'm' || e.key === 'M') { prefs.mute = !prefs.mute; savePrefs(); audioInit(); updMute(); return; }
   if (e.key === 'Enter' && ov) { var b = { menu: $('mContinue').hidden ? 'mNew' : 'mContinue', win: 'wNext', over: 'oAgain', pause: 'pResume' }[ov]; if (b) { $(b).click(); e.preventDefault(); } return; }
   var k = keyMap(e.key); if (k && !ov) { keys[k] = true; e.preventDefault(); }
 });
 document.addEventListener('keyup', function (e) { var k = keyMap(e.key); if (k) keys[k] = false; });
-function setBtns() { $('cLeft').classList.toggle('on', btn.left); $('cRight').classList.toggle('on', btn.right); $('cFire').classList.toggle('on', btn.fire || prefs.auto); $('cAf').hidden = !prefs.auto; }
+function setBtns() { $('cLeft').classList.toggle('on', btn.left); $('cRight').classList.toggle('on', btn.right); $('cFire').classList.toggle('on', btn.fire || prefs.auto); $('cAf').hidden = !prefs.auto;
+  $('app').classList.toggle('btnmode', !!prefs.btns); }
 [['cLeft', 'left'], ['cRight', 'right'], ['cFire', 'fire']].forEach(function (p) { var el = $(p[0]);
-  el.addEventListener('pointerdown', function (e) { e.preventDefault(); audioInit(); try { el.setPointerCapture(e.pointerId); } catch (x) {} btn[p[1]] = true; setBtns(); });
+  el.addEventListener('pointerdown', function (e) { e.preventDefault(); e.stopPropagation(); audioInit(); try { el.setPointerCapture(e.pointerId); } catch (x) {} btn[p[1]] = true; setBtns(); });
   ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(function (n) { el.addEventListener(n, function () { btn[p[1]] = false; setBtns(); }); });
   el.addEventListener('contextmenu', function (e) { e.preventDefault(); });
 });
-function logicalX(e) { var r = cv.getBoundingClientRect(); return (e.clientX - r.left) / r.width * LW; }
-cv.addEventListener('pointerdown', function (e) { if (!g || !running || paused) return; e.preventDefault(); audioInit(); try { cv.setPointerCapture(e.pointerId); } catch (x) {} drag = { id: e.pointerId, off: g.px - logicalX(e), x: g.px }; });
-cv.addEventListener('pointermove', function (e) { if (!drag || e.pointerId !== drag.id) return; drag.x = Math.max(0, Math.min(LW, logicalX(e) + drag.off)); });
-['pointerup', 'pointercancel', 'lostpointercapture'].forEach(function (n) { cv.addEventListener(n, function (e) { if (drag && e.pointerId === drag.id) drag = null; }); });
+
+/* one-finger drag: touch anywhere on the playfield or the pad below it and slide. Relative 1:1 (the cannon moves exactly as far as the
+   finger, in screen pixels), clamped to the playfield; re-anchored at the edges so a change of direction responds at once. */
+var padEl = $('pad'), knobEl = $('padKnob'), fingerEl = $('finger'), knobX = -1;
+function pxBounds() { return [SK.CFG.playerW / 2 + 2, LW - SK.CFG.playerW / 2 - 2]; }
+function dragStart(e, onPad) {
+  if (!g || !running || paused || openOverlay()) return false;
+  if (drag && drag.id !== e.pointerId) dragEnd();                                   // a second finger takes over
+  audioInit(); drag = { id: e.pointerId, cx: e.clientX, px0: g.px, x: g.px, lastX: e.clientX, pad: onPad };
+  padEl.classList.add('touch'); showFinger(e.clientX, e.clientY, onPad); return true;
+}
+function dragMove(e) {
+  if (!drag || e.pointerId !== drag.id) return;
+  var ev2 = e.getCoalescedEvents ? e.getCoalescedEvents() : null, cx = ev2 && ev2.length ? ev2[ev2.length - 1].clientX : e.clientX;
+  var sc = LW / (cv.getBoundingClientRect().width || cssW), b = pxBounds(), nx = drag.px0 + (cx - drag.cx) * sc;
+  if (nx < b[0]) { nx = b[0]; drag.px0 = nx; drag.cx = cx; } else if (nx > b[1]) { nx = b[1]; drag.px0 = nx; drag.cx = cx; }
+  drag.x = nx; drag.lastX = cx; showFinger(cx, e.clientY, drag.pad);
+}
+function dragEnd(e) { if (e && drag && e.pointerId !== drag.id) return; drag = null; padEl.classList.remove('touch'); fingerEl.classList.remove('on'); }
+function reanchor() { if (drag && g) { drag.px0 = g.px; drag.x = g.px; drag.cx = drag.lastX; } }     // after a respawn / new wave the finger keeps control
+function showFinger(x, y, onPad) { if (!SHOWTOUCH && !(DEBUG && window.__finger)) return; /* recordings only (a real finger covers it; the glowing knob is the feedback) */ fingerEl.style.transform = 'translate(' + x + 'px,' + y + 'px)'; fingerEl.classList.add('on'); }
+var SHOWTOUCH = DEBUG && /[?&]showtouch=1/.test(location.search);                   // recordings: show the touch point on the playfield too
+function updKnob() { // the pad's knob sits right below the cannon
+  if (!g || prefs.btns) return; var cr = cv.getBoundingClientRect(), pr = padEl.getBoundingClientRect(); if (!pr.width) return;
+  var x = Math.round((cr.left - pr.left + g.px / LW * cr.width) * 2) / 2; if (x === knobX) return; knobX = x; knobEl.style.transform = 'translateX(' + x + 'px)';
+}
+[$('stage'), padEl].forEach(function (el) {
+  el.addEventListener('pointerdown', function (e) { if (e.button > 0) return; if (dragStart(e, el === padEl)) { e.preventDefault(); try { el.setPointerCapture(e.pointerId); } catch (x) {} } });
+  el.addEventListener('pointermove', dragMove);
+  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(function (n) { el.addEventListener(n, dragEnd); });
+  el.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+  // iOS Safari: no scroll, double-tap zoom, magnifier or pull-to-refresh from the game area (pointer events still arrive)
+  ['touchstart', 'touchmove'].forEach(function (n) { el.addEventListener(n, function (e) { if (e.cancelable) e.preventDefault(); }, { passive: false }); });
+});
+document.addEventListener('touchmove', function (e) { if (e.cancelable && !(e.target.closest && e.target.closest('.card'))) e.preventDefault(); }, { passive: false });
+['gesturestart', 'gesturechange', 'dblclick'].forEach(function (n) { document.addEventListener(n, function (e) { if (!(e.target.closest && e.target.closest('input'))) e.preventDefault(); }, { passive: false }); });
+function fingerBot() { // debug only (e2e + promo): a finger on the pad, slid at human speed towards the aim bot's target; the real drag code moves the cannon.
+  // F.lift: the finger is lifted whenever the (clip's) bot does not want to fire - with one-finger control, finger down = firing.
+  var F = window.__finger, b = (window.__bot || BOT)(g, SK), pr = padEl.getBoundingClientRect(), cr = cv.getBoundingClientRect(), sc = cr.width / LW, y = pr.top + pr.height * .6 + Math.sin(vtime * 2.6) * 2;
+  if (F.x == null || !drag) F.x = cr.left + g.px * sc;                                               // finger lands right below the cannon (it only moves the cannon while down)
+  var want = F.x + (b.targetX - g.px) * sc, maxd = (F.speed || 330) * sc / 60; F.x += Math.max(-maxd, Math.min(maxd, want - F.x));
+  var down = !F.lift || b.fire || (F.lift === 'once' && F.was); if (down) F.was = true;               // lift 'once': first touch when the bot wants to fire, then the finger stays down
+  if (down && !drag) dragStart({ pointerId: 999, clientX: F.x, clientY: y }, true); else if (!down && drag) dragEnd();
+  if (drag) dragMove({ pointerId: 999, clientX: F.x, clientY: y });
+}
 document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') { if (running && !paused) pauseGame(true); else saveGame(); } });
 window.addEventListener('pagehide', saveGame);
 window.addEventListener('blur', function () { if (running && !paused && !DEBUG) pauseGame(true); });
 /* ---------------- overlays ---------------- */
-var OVS = ['menu', 'share', 'rules', 'pause', 'win', 'over', 'confirm'];
+var OVS = ['menu', 'share', 'rules', 'pause', 'win', 'over', 'lb', 'confirm'];
 function show(id) { $(id).hidden = false; }
 function hide(id) { $(id).hidden = true; if (id === 'win') stopConfetti(); }
 function hideAll() { OVS.forEach(function (id) { if (!$(id).hidden) hide(id); }); }
@@ -894,7 +1044,7 @@ function openMenu() {
   $('mContinue').hidden = !cont; if (cont) $('mContInfo').textContent = t('contInfo', { w: sv.wave, s: fmt(sv.score), l: sv.lives });
   $('mNew').classList.toggle('main', !cont);
   $('mBest').textContent = stats.best ? t('best', { s: fmt(stats.best), w: stats.bestWave }) : t('bestNone');
-  setSw('mAuto', prefs.auto); show('menu'); draw();
+  setSw('mAuto', prefs.auto); setSw('mBtns', prefs.btns); show('menu'); draw();
 }
 function setSw(id, on) { $(id).setAttribute('aria-checked', on ? 'true' : 'false'); }
 $('mContinue').onclick = function () { audioInit(); sfx('tap'); hide('menu'); if (!g || g.over) { g = loadSave(); if (!g) { startGame(true); return; } running = false; }
@@ -903,6 +1053,8 @@ $('mNew').onclick = function () { audioInit(); sfx('tap'); if (!$('mContinue').h
 $('cYes').onclick = function () { hide('confirm'); clearSave(); running = false; g = null; startGame(true); };
 $('cNo').onclick = function () { hide('confirm'); };
 $('mAuto').onclick = function () { prefs.auto = !prefs.auto; savePrefs(); setSw('mAuto', prefs.auto); setBtns(); };
+$('mBtns').onclick = function () { prefs.btns = !prefs.btns; savePrefs(); setSw('mBtns', prefs.btns); setBtns(); layout(); };
+$('mLb').onclick = function () { openLb(); };
 $('mRules').onclick = function () { show('rules'); $('rulesCard').scrollTop = 0; };
 $('pRules').onclick = function () { show('rules'); $('rulesCard').scrollTop = 0; };
 $('pResume').onclick = resumeGame;
@@ -937,7 +1089,7 @@ function fillWin() {
   var hi = Math.max(stats.best, g.score); $('winBest').textContent = g.score > stats.best ? t('newBest', { s: fmt(g.score) }) : t('bestIs', { s: fmt(hi) });
   $('wNextSub').textContent = t('nextSub', { w: g.wave + 1 });
 }
-function openWin() { running = false; if (g.score > stats.best) { stats.best = g.score; } stats.bestWave = Math.max(stats.bestWave, g.wave + 1); saveStats(); fillWin(); show('win'); confetti(); }
+function openWin() { running = false; dragEnd(); if (g.score > stats.best) { stats.best = g.score; } stats.bestWave = Math.max(stats.bestWave, g.wave + 1); saveStats(); fillWin(); show('win'); confetti(); }
 $('wNext').onclick = function () { audioInit(); hide('win'); nextWave(); };
 $('wMenu').onclick = function () { hide('win'); openMenu(); };
 
@@ -948,7 +1100,7 @@ function fillOver(gg, newBest) {
   $('osScore').textContent = fmt(gg.score); $('osWave').textContent = gg.wave; $('osKills').textContent = gg.kills;
   $('overBest').textContent = newBest ? t('newBest', { s: fmt(gg.score) }) : t('bestIs', { s: fmt(stats.best) });
 }
-function openOver(gg, newBest) { lastOver = [gg, newBest]; fillOver(gg, newBest); hideAll(); show('over'); if (newBest) confetti(); }
+function openOver(gg, newBest) { dragEnd(); lastOver = [gg, newBest]; fillOver(gg, newBest); hideAll(); show('over'); onlineOver(gg); if (newBest) confetti(); }
 $('oAgain').onclick = function () { audioInit(); hide('over'); g = null; startGame(true); };
 $('oMenu').onclick = function () { hide('over'); g = null; openMenu(); };
 
@@ -965,6 +1117,125 @@ function confetti() {
     cfT = requestAnimationFrame(f); })(t0);
 }
 function stopConfetti() { cancelAnimationFrame(cfT); var c = $('confetti'); c.getContext('2d').clearRect(0, 0, c.width, c.height); }
+/* ---------------- online leaderboard (opt-in) ----------------
+   Same Supabase project and table as STRØM/POWER/PRĄD and Sneaky Bugs (public.scores, game = 'skjold'). Scores go in only through the
+   checked function public.skjold_submit (supabase/supabase_skjold.sql: plausibility vs. waves, kills and play time, name filter, rate limits,
+   salted IP hash max 24 h). Nothing is sent unless the player ticks "Show my score on the online leaderboard"; the game works fully without it. */
+var LB_URL = 'https://oqvqvpvlmmyxivqpaifl.supabase.co', LB_KEY = 'sb_publishable_qnC7OiwBa1HV7H9oBk4I9A_KUUHTOFG'; // publishable key: public by design (security = RLS + checks in the database)
+var LB_KEY_LS = 'skjold_lb_v1', LBQ_KEY = 'skjold_lbq_v1', RUN_KEY = 'skjold_run_v1';
+function lsJSON(k, d) { try { var v = JSON.parse(localStorage.getItem(k) || 'null'); return v == null ? d : v; } catch (e) { return d; } }
+function lsPut(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+var lbp = lsJSON(LB_KEY_LS, { nick: '', on: false }); lbp.nick = cleanNick(lbp.nick); lbp.on = !!lbp.on;
+function lbSave() { lsPut(LB_KEY_LS, { nick: lbp.nick, on: lbp.on }); }
+
+// nickname rules: same as the database (2–16 chars, letters/digits/space . _ ' -) + the same word filter as Sneaky Bugs
+var NAME_RE = /^[0-9A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźżÆØÅæøåÄÖÜäöüÉÈÁéèáß][0-9A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźżÆØÅæøåÄÖÜäöüÉÈÁéèáß _.'-]*$/;
+var BAD_SUB = ['kurw', 'chuj', 'pierdol', 'pierdal', 'jeban', 'jebac', 'jebie', 'zajeb', 'wyjeb', 'pizd', 'dziwk', 'szmat', 'kutas', 'cwel', 'ruchac', 'skurwiel',
+  'faen', 'fitte', 'fitta', 'hestkuk', 'jaevel', 'jaevla', 'fanden', 'rasshol', 'rasshul', 'drittsekk', 'neger',
+  'fuck', 'shit', 'cunt', 'bitch', 'pussy', 'whore', 'nigg', 'faggot', 'asshole', 'bastard', 'retard', 'hitler', 'penis', 'vagina', 'porn', 'twat', 'dildo', 'wanker', 'boob'];
+var BAD_WORD = ['huj', 'cipa', 'fiut', 'pedal', 'debil', 'dupa', 'dupek', 'ciota', 'murzyn', 'kuk', 'kukk', 'pikk', 'hore', 'javel', 'javla', 'soper',
+  'fuk', 'fck', 'dick', 'cock', 'fag', 'rape', 'rapist', 'ass', 'sex', 'cum', 'tits', 'slut', 'nazi', 'wank', 'kkk', 'heil'];
+function normName(x) { x = String(x).toLowerCase().replace(/æ/g, 'ae').replace(/ß/g, 'ss'); var F = 'ąćęłńóśźżøåäöüéèêáàâíìîúùûýçñ0134578@$!|', T2 = 'acelnoszzoaaoueeeaaaiiiuuuycnoieastbasii', o = '';
+  for (var i = 0; i < x.length; i++) { var j = F.indexOf(x[i]); o += j < 0 ? x[i] : T2[j]; } return o; }
+function dedup(x) { return x.replace(/(.)\1+/g, '$1'); }
+function nameBlocked(n) { var x = normName(n), c = x.replace(/[^a-z]/g, ''), cd = dedup(c), w = x.split(/[^a-z]+/).filter(Boolean), wd = w.map(dedup);
+  return BAD_SUB.some(function (b) { return c.indexOf(b) >= 0 || cd.indexOf(dedup(b)) >= 0; }) || BAD_WORD.some(function (b) { return w.indexOf(b) >= 0 || wd.indexOf(dedup(b)) >= 0 || c === b || cd === dedup(b); }); }
+function cleanNick(n) { return String(n || '').replace(/<[^>]*>/g, '').replace(/[\u0000-\u001f\u007f<>&"`\\]/g, '').replace(/\s+/g, ' ').trim().slice(0, 16); }
+function nickError(n) { if (n.length < 2) return 'nickShort'; if (!NAME_RE.test(n)) return 'nickChars'; if (nameBlocked(n)) return 'nickBad'; return ''; }
+
+function sb(path, body) { // tiny REST client (PostgREST); rejects with {status, msg}
+  var h = { apikey: LB_KEY }; if (/^eyJ/.test(LB_KEY)) h.Authorization = 'Bearer ' + LB_KEY;
+  if (body) h['Content-Type'] = 'application/json';
+  var ctl = typeof AbortController !== 'undefined' ? new AbortController() : null, tm = ctl ? setTimeout(function () { ctl.abort(); }, 7000) : 0;
+  return fetch(LB_URL + '/rest/v1/' + path, { method: body ? 'POST' : 'GET', headers: h, body: body ? JSON.stringify(body) : undefined, signal: ctl ? ctl.signal : undefined, credentials: 'omit', referrerPolicy: 'no-referrer', cache: 'no-store' })
+    .then(function (r) { clearTimeout(tm); return r.text().then(function (tx) { var j = null; try { j = tx ? JSON.parse(tx) : null; } catch (e) {}
+      if (!r.ok) throw { status: r.status, msg: (j && (j.message || j.code)) || tx || '' }; return j; }); },
+      function (e) { clearTimeout(tm); throw { status: 0, msg: String(e && e.name || e) }; });
+}
+
+/* one-time run id: only when the leaderboard is on at game start, so the server can measure the play time itself */
+function lbRunStart(gg) { lsPut(RUN_KEY, null); if (!lbp.on || !gg) return; var id = gg.runId = Math.random().toString(36).slice(2);
+  sb('rpc/skjold_start', {}).then(function (tok) { if (typeof tok === 'string' && g && g.runId === id) lsPut(RUN_KEY, { id: id, tok: tok }); }, function () {}); }
+
+function lbClassify(e) { var m = String(e && e.msg || '').toLowerCase();
+  if (/name not allowed|scores_name_chk/.test(m)) return 'nickBad'; if (/rate limit/.test(m) || e.status === 429) return 'lbRate';
+  if (e.status === 400 || e.status === 409 || /implausible|violates/.test(m)) return 'lbRejected'; return 'lbQueued'; } // 0/404/5xx: offline or not set up yet -> retry later
+function lbPost(row) {
+  return sb('rpc/skjold_submit', { p_name: row.name, p_score: row.score, p_ko: row.ko, p_wave: row.wave, p_secs: row.secs, p_token: row.tok || null })
+    .then(function (j) { return { st: 'sent', rank: j && j.rank }; }, function (e) { return { st: lbClassify(e), status: e.status }; });
+}
+function lbQueue(row) { var q = lsJSON(LBQ_KEY, []).filter(function (x) { return !(x.name === row.name && x.score === row.score); }); q.push(row); lsPut(LBQ_KEY, q.slice(-5)); }
+var lbFlushing = false;
+function lbFlush() { // scores that could not be sent (offline / server not reachable) are retried later, max 7 days
+  if (lbFlushing || !lbp.on) return; var q = lsJSON(LBQ_KEY, []).filter(function (x) { return Date.now() - x.t < 7 * 864e5 && (x.n || 0) < 12; }); if (!q.length) { lsPut(LBQ_KEY, null); return; }
+  lbFlushing = true; var left = [];
+  q.reduce(function (p, x) { return p.then(function () { return lbPost(x).then(function (r) { if (r.st === 'lbQueued') { x.n = (x.n || 0) + 1; left.push(x); } }); }); }, Promise.resolve())
+    .then(function () { lsPut(LBQ_KEY, left.length ? left : null); lbFlushing = false; });
+}
+window.addEventListener('online', lbFlush);
+
+/* game-over card: nickname + opt-in tick box + send; automatic when the player is already in */
+var overRow = null;
+function lbMsg(id, key, o, err) { var el = $(id); el.textContent = key ? t(key, o) : ''; el.classList.toggle('err', !!err); }
+function onlineOver(gg) {
+  var run = lsJSON(RUN_KEY, null); lsPut(RUN_KEY, null);
+  overRow = { name: lbp.nick, score: gg.score, ko: gg.kills, wave: gg.wave, secs: Math.round(gg.t), tok: run && gg.runId && run.id === gg.runId ? run.tok : null, t: Date.now(), sent: false };
+  $('oNick').value = lbp.nick; $('oChk').checked = lbp.on; lbMsg('oMsg', '');
+  $('oSend').hidden = false; $('oSend').disabled = false;
+  if (lbp.on && lbp.nick && !nickError(lbp.nick) && gg.score > 0) lbSend();
+}
+function lbSend() {
+  if (!overRow || overRow.sent) return;
+  var n = cleanNick($('oNick').value); $('oNick').value = n;
+  if (!$('oChk').checked) { lbMsg('oMsg', 'needOpt', null, true); return; }
+  var er = nickError(n); if (er) { lbMsg('oMsg', er, null, true); $('oNick').focus(); return; }
+  if (!overRow.score) { lbMsg('oMsg', 'lbNoScore', null, true); return; }
+  lbp.nick = n; lbp.on = true; lbSave(); syncOptin();
+  var row = overRow; row.name = n; row.sent = true; $('oSend').disabled = true; lbMsg('oMsg', 'sending');
+  if (!SK.plausible(row.score, row.ko, row.wave, row.secs)) { lbMsg('oMsg', 'lbRejected', null, true); return; }
+  lbPost(row).then(function (r) {
+    if (row !== overRow) return;
+    if (r.st === 'sent') { $('oSend').hidden = true; lbMsg('oMsg', r.rank ? 'sentRank' : 'sentOk', { r: r.rank }); lbFlush(); }
+    else if (r.st === 'lbQueued') { lbQueue(row); $('oSend').hidden = true; lbMsg('oMsg', 'lbQueued'); }
+    else { if (r.st !== 'lbRejected') { row.sent = false; $('oSend').disabled = false; } lbMsg('oMsg', r.st, null, true); }
+  });
+}
+$('oSend').onclick = function () { audioInit(); sfx('tap'); lbSend(); };
+$('oNick').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); lbSend(); } });
+$('oChk').onchange = function () { lbp.on = $('oChk').checked; if (!lbp.on) lbMsg('oMsg', ''); lbSave(); syncOptin(); };
+$('oNick').onchange = function () { var n = cleanNick($('oNick').value); if (!nickError(n)) { lbp.nick = n; lbSave(); syncOptin(); } };
+$('oLbOpen').onclick = function () { openLb('all'); };
+
+/* leaderboard overlay: Top 50 (all time), today, this week; best score per nickname */
+var lbTab = 'all', lbReq = 0;
+function syncOptin() { $('lNick').value = lbp.nick; $('lChk').checked = lbp.on; if (!$('over').hidden) { $('oChk').checked = lbp.on; if (!overRow || !overRow.sent) $('oNick').value = lbp.nick; } }
+function lbSince(tab) { var d = new Date(); d.setHours(0, 0, 0, 0); if (tab === 'week') d.setDate(d.getDate() - (d.getDay() + 6) % 7); return tab === 'all' ? null : d.toISOString(); }
+function openLb(tab) { syncOptin(); lbMsg('lMsg', lbp.on && lbp.nick ? 'lbOnHint' : 'lbOffHint'); $('lMsg').classList.remove('err'); show('lb'); $('lbCard').scrollTop = 0; lbLoad(tab || lbTab); }
+function lbLoad(tab) {
+  lbTab = tab; document.querySelectorAll('#lb .tab').forEach(function (b) { var on = b.getAttribute('data-tab') === tab; b.classList.toggle('on', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
+  var id = ++lbReq, list = $('lbList'), since = lbSince(tab); list.innerHTML = '<div class="empty">' + t('lbLoading') + '</div>'; $('lbNote').textContent = '';
+  sb('scores?select=name,score,wave,created_at&game=eq.skjold' + (since ? '&created_at=gte.' + encodeURIComponent(since) : '') + '&order=score.desc,created_at.asc&limit=1000').then(function (rows) {
+    if (id !== lbReq) return; var seen = {}, out = [];
+    (rows || []).forEach(function (r) { var k = String(r.name).toLowerCase(); if (seen[k] || out.length >= 50) return; seen[k] = 1; out.push(r); });
+    lbRender(out); $('lbNote').textContent = out.length ? t('lbNote') : '';
+  }, function () { if (id !== lbReq) return; list.innerHTML = '<div class="empty">' + t('lbDown') + '</div>'; });
+}
+function esc(x) { return String(x).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function lbRender(rows) {
+  var me = lbp.nick.toLowerCase(), list = $('lbList');
+  if (!rows.length) { list.innerHTML = '<div class="empty">' + t('lbEmpty') + '</div>'; return; }
+  list.innerHTML = '<ol>' + rows.map(function (r, i) { return '<li' + (me && String(r.name).toLowerCase() === me ? ' class="me"' : '') + '><span class="ps">' + (i + 1) + '</span><span class="nm">' + esc(r.name) + '</span><span class="wv">' + esc(t('lbWaveN', { w: r.wave || 1 })) + '</span><span class="sc">' + fmt(r.score) + '</span></li>'; }).join('') + '</ol>';
+  var mine = list.querySelector('li.me'); if (mine && mine.scrollIntoView && mine.offsetTop > 300) mine.scrollIntoView({ block: 'center' });
+}
+document.querySelectorAll('#lb .tab').forEach(function (b) { b.onclick = function () { sfx('tap'); lbLoad(b.getAttribute('data-tab')); }; });
+$('lbClose').onclick = $('lbX').onclick = function () { hide('lb'); };
+$('lChk').onchange = function () { var n = cleanNick($('lNick').value), er = nickError(n);
+  if ($('lChk').checked && er) { $('lChk').checked = false; lbMsg('lMsg', er, null, true); $('lNick').focus(); return; }
+  if (!er) lbp.nick = n; lbp.on = $('lChk').checked; lbSave(); syncOptin(); lbMsg('lMsg', lbp.on ? 'lbOnHint' : 'lbOffHint'); lbLoad(lbTab); if (lbp.on) lbFlush(); };
+$('lNick').onchange = function () { var n = cleanNick($('lNick').value), er = nickError(n); $('lNick').value = n;
+  if (er) { lbMsg('lMsg', er, null, true); return; } lbp.nick = n; lbSave(); syncOptin(); lbMsg('lMsg', lbp.on ? 'lbOnHint' : 'lbOffHint'); };
+$('lNick').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); $('lNick').blur(); } });
+setTimeout(lbFlush, 3000);
 /* ---------------- analytics (launch build only): GoatCounter, cookie-free, self-hosted count.js (ISC) ----------------
    same setup as the other Stop60 games: one page view per load (/skjold/, /skjold/pl/, /skjold/en/) + events skjold-start, skjold-wave-<n> (wave n cleared, n ≤ 10),
    skjold-over-w<n> (game over in wave n) and skjold-share. Events go out after a random 0–15 s delay, pending ones are flushed when the page is hidden.
@@ -996,7 +1267,9 @@ if (DEBUG) window.SKJOLD = {
   setLives: function (n) { g.lives = n; }, setScore: function (n) { g.score = n; },
   skipIntro: function () { intro = 0; hideBanner(); },
   fps: function (ms) { return new Promise(function (res) { var n = 0, worst = 0, t0 = performance.now(), last = t0; (function f(now) { n++; worst = Math.max(worst, now - last); last = now; if (now - t0 < ms) requestAnimationFrame(f); else res({ fps: n * 1000 / (now - t0), worst: worst }); })(t0); }); },
-  bot: function (on) { window.__bot = on ? BOT : null; }, dpr: function () { return { cap: dprCap, dpr: DPR, w: cv.width }; },
+  bot: function (on) { window.__bot = on ? BOT : null; },
+  finger: function (on, o) { if (on) window.__finger = Object.assign({ speed: 330 }, o); else { window.__finger = null; dragEnd(); } }, // a simulated finger on the drag pad (aim bot steers it)
+  drag: function () { return drag && { x: drag.x, pad: drag.pad }; }, lb: function () { return { nick: lbp.nick, on: lbp.on, q: lsJSON(LBQ_KEY, []), run: lsJSON(RUN_KEY, null) }; }, dpr: function () { return { cap: dprCap, dpr: DPR, w: cv.width }; },
   manual: function (on) { manual = !!on; window.__vt = window.__vt || performance.now(); },          // recording: stop rAF, drive frames by hand
   tick: function (ms) { window.__vt += ms; frame(window.__vt); },                                   // advance game + effects by ms (one video frame)
   evlog: function (on) { if (on) window.__evlog = []; return window.__evlog; },                      // game events with times (for the promo sound track)
