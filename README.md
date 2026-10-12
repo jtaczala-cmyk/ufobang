@@ -1,4 +1,4 @@
-# Kosmoskjold · Kosmiczna Tarcza · Cosmo Shield
+# Ufobang
 
 Free mobile-first browser arcade game by Stop60, an original fixed-shooter inspired by the classic arcade alien-invasion genre:
 defend the Earth – a laser cannon at the bottom against a marching fleet of 55 aliens, four erodible shields and a red mystery ship.
@@ -13,4 +13,4 @@ defend the Earth – a laser cannon at the bottom against a marching fleet of 55
 - Free, no ads, no account, no cookies
 
 © 2026 Stop60 — all rights reserved, see LICENSE. Third-party fonts/QR library: see THIRD-PARTY-NOTICES.md.
-- Address: https://stop60.no/skjold/
+- Address: https://stop60.no/ufobang/

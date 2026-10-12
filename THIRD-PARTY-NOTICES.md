@@ -1,6 +1,6 @@
 # Third-party notices
 
-The game code and content of Kosmoskjold / Kosmiczna Tarcza / Cosmo Shield are © 2026 Stop60, all rights reserved (see `LICENSE`).
+The game code and content of Ufobang are © 2026 Stop60, all rights reserved (see `LICENSE`).
 The game is a single self-contained `index.html` without external requests (the public build additionally loads the
 self-hosted, cookie-free GoatCounter script `count.js`). The character and background art are original renders made for this game (generated with Kling AI on the rights holder's account and edited by Stop60), embedded as WebP; icons are inline SVG; all sounds are synthesised live with the Web Audio API (no samples).
 
