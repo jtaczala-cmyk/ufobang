@@ -1,7 +1,7 @@
 # Ufobang
 
-Free mobile-first browser arcade game by Stop60, an original fixed-shooter inspired by the classic arcade alien-invasion genre:
-defend the Earth – a laser cannon at the bottom against a marching fleet of 55 aliens, four erodible shields and a red mystery ship.
+Free mobile-first browser space shooter by Stop60, an original game:
+way too many aliens and just one laser cannon – blast, dodge and chase the Red Manta for bonus points.
 
 - Single self-contained `index.html` (inline JS/CSS, embedded stop60.no fonts, rendered art and QR generator; works offline once loaded)
 - Languages: Norsk (bokmål, default), Polski (`/pl/`), English (`/en/`), flag switch in the header; `?lang=no|pl|en`
