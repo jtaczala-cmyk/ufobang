@@ -220,6 +220,7 @@ a{color:var(--teal)}
 #winBest,#overBest{font-size:13px!important;color:var(--teal2)!important;min-height:1em}
 #pause .card{text-align:center}
 #confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:21}
+#mCal[hidden],#tiltMsg[hidden]{display:none}
 #dbg{position:fixed;left:4px;bottom:4px;z-index:30;font:10px monospace;background:#200;color:#f88;padding:2px 5px;border-radius:5px;opacity:.7;pointer-events:none}
 @media (max-height:740px){.hart{display:none}#menu .card{padding-top:14px}.pts li{font-size:12.5px}}
 @media (max-height:680px){.pts{display:none}#menu .tbl{margin-top:8px}}
@@ -302,6 +303,8 @@ a{color:var(--teal)}
   <button class="btn" id="mNew"><span class="bt"><span data-t="newGame">Nytt spill</span><small data-t="newGameSub">Bølge 1 · 3 liv</small></span></button>
   <button class="tg" id="mAuto" role="switch" aria-checked="false"><span><span data-t="autofire">Autoskyting</span><small data-t="autofireSub">Kanonen skyter av seg selv – du styrer bare</small></span><i class="sw"></i></button>
   <button class="tg" id="mBtns" role="switch" aria-checked="false"><span><span data-t="btnMode">Knapper i stedet for å dra</span><small data-t="btnModeSub"></small></span><i class="sw"></i></button>
+  <button class="tg" id="mTilt" role="switch" aria-checked="false"><span><span data-t="tilt">Styr med vipping</span><small data-t="tiltSub"></small></span><i class="sw"></i></button>
+  <button class="btn" id="mCal" data-t="calib" hidden>Kalibrer</button><p id="tiltMsg" role="status" style="text-align:center;color:#fbbf24;font-size:13px;margin:4px 0" hidden></p>
   <div id="mShareRow"><button type="button" class="qrfig" id="mQr"><span class="qrsvg" id="mQrSvg"></span><small data-t="qrLabel">Skann og spill</small></button>
     <div class="col"><button class="btn tl" id="mShare"><svg class="shico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-t="share">Del spillet</span></button><button class="btn lbbtn" id="mLb"><svg class="shico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7M10 17h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-t="lb">Toppliste</span></button><button class="btn" id="mRules" data-t="howTo">Slik spiller du</button></div></div>
   <p class="mfoot" data-t="free">Laget med lidenskap – gratis for alle</p>
@@ -558,6 +561,51 @@ return api;
 'use strict';
 var DEBUG = /[?&]debug=1(&|$)/.test(location.search);
 var LAUNCH = true; // public launch build: no test badge/title, analytics + privacy link on
+var TILT_KEY; TILT_KEY = 'ufobang_tilt_v1';
+/* Optional tilt steering (DeviceOrientation). Off by default; touch stays the default. */
+var TILT = (function () {
+  var K = typeof TILT_KEY === 'string' ? TILT_KEY : 'tilt_v1';
+  var T = { on: false, have: false, rx: 0, ry: 0, x0: 0, y0: 0, cal: true, ix: 0, iy: 0, last: 0, granted: false, ang: -1, dz: 3, full: 18, onchange: null, lt: 0 };
+  try { T.on = localStorage.getItem(K) === '1'; } catch (e) {}
+  function scrAngle() { var a = screen.orientation && typeof screen.orientation.angle === 'number' ? screen.orientation.angle : (window.orientation || 0); return ((a % 360) + 360) % 360; }
+  function dz(v) { var a = Math.abs(v); if (a <= T.dz) return 0; return (v < 0 ? -1 : 1) * Math.min(1, (a - T.dz) / (T.full - T.dz)); }
+  window.addEventListener('deviceorientation', function (e) {
+    if (e.beta == null || e.gamma == null) return;
+    var b = e.beta, gm = e.gamma, a = scrAngle(), x, y;
+    // x: tilt right = +, y: top edge away from you (forward) = - ; same feel in portrait and landscape
+    if (a === 90) { x = b; y = -gm; } else if (a === 270) { x = -b; y = gm; } else if (a === 180) { x = -gm; y = -b; } else { x = gm; y = b; }
+    if (T.cal || T.ang !== a) { T.x0 = x; T.y0 = y; T.cal = false; T.ang = a; }   // calibrate: current angle = neutral (also after rotating the phone)
+    T.rx = x - T.x0; T.ry = y - T.y0; T.have = true; T.last = Date.now();
+  });
+  T.active = function () { return T.on && T.have && Date.now() - T.last < 1000; };
+  T.update = function (dt) { // smoothing; dt in s (if omitted, measured)
+    if (dt == null) { var n = (window.performance ? performance.now() : Date.now()); dt = T.lt ? Math.min(0.1, (n - T.lt) / 1000) : 0.016; T.lt = n; }
+    var k = Math.min(1, dt * 10), act = T.active();
+    T.ix += ((act ? dz(T.rx) : 0) - T.ix) * k; T.iy += ((act ? dz(T.ry) : 0) - T.iy) * k;
+  };
+  T.calibrate = function () { T.cal = true; T.ix = T.iy = 0; };
+  T.set = function (on) { T.on = on; try { localStorage.setItem(K, on ? '1' : '0'); } catch (e) {} if (T.onchange) T.onchange(); };
+  T.perm = function (cb) { var D = window.DeviceOrientationEvent;
+    if (!D) { cb(false, 'tiltNone'); return; }
+    if (T.granted || typeof D.requestPermission !== 'function') { T.granted = true; cb(true); return; }
+    try { D.requestPermission().then(function (r) { T.granted = r === 'granted'; cb(T.granted, 'tiltDenied'); }).catch(function () { cb(false, 'tiltDenied'); }); } catch (e) { cb(false, 'tiltDenied'); } };
+  T.toggle = function (msg) { // must run inside a tap (iOS permission prompt)
+    if (T.on) { T.set(false); msg(''); return; }
+    T.perm(function (ok, why) { if (ok) { T.calibrate(); T.set(true); msg(''); setTimeout(function () { if (T.on && !T.have) { T.set(false); msg('tiltNone'); } }, 1500); } else { T.set(false); msg(why); } });
+  };
+  T.ensure = function (msg) { // remembered ON from an earlier visit: iOS needs the permission again, asked on the "play" tap
+    if (T.on && !T.granted) T.perm(function (ok, why) { if (!ok) { T.set(false); msg(why); } });
+  };
+  T.L = {
+    no: { tilt: 'Styr med vipping', calib: 'Kalibrer', on: 'PÅ', off: 'AV', tiltDenied: 'Ingen tilgang til bevegelsessensor – berøring brukes.', tiltNone: 'Fant ingen bevegelsessensor – berøring brukes.', tiltCal: 'Kalibrert: denne vinkelen er nøytral.' },
+    pl: { tilt: 'Steruj pochyleniem', calib: 'Kalibruj', on: 'WŁ.', off: 'WYŁ.', tiltDenied: 'Brak dostępu do czujnika ruchu – używam dotyku.', tiltNone: 'Nie znaleziono czujnika ruchu – używam dotyku.', tiltCal: 'Skalibrowano: ten kąt jest neutralny.' },
+    en: { tilt: 'Tilt control', calib: 'Calibrate', on: 'ON', off: 'OFF', tiltDenied: 'Motion sensor access denied – using touch.', tiltNone: 'No motion sensor found – using touch.', tiltCal: 'Calibrated: this angle is neutral.' }
+  };
+  return T;
+})();
+TILT.L.no.tiltSub = 'Vipp mobilen for å flytte kanonen – hold fingeren nede for å skyte';
+TILT.L.pl.tiltSub = 'Pochyl telefon, by przesuwać działo – trzymaj palec, by strzelać';
+TILT.L.en.tiltSub = 'Tilt the phone to move the cannon – keep a finger down to fire';
 var LANGDIR = (/\/(pl|en)\/(index\.html)?$/.exec(location.pathname) || [])[1] || ''; // /ufobang/pl/ and /ufobang/en/ = language entry pages (own SEO/OG); the game URL stays /ufobang/
 var SAVE_KEY = 'skjold_save_v1', PREF_KEY = 'skjold_prefs_v1', STAT_KEY = 'skjold_stats_v1';
 if (DEBUG && /[?&]reset=1/.test(location.search)) try { localStorage.clear(); } catch (e) {} // tests: start from a clean device
@@ -670,7 +718,7 @@ var T = {
         ['Saving', 'The game saves itself on your device, together with your best score. Once the page has loaded, it also works offline.']],
       about: 'Ufobang is an original space game by Stop60. Made with passion and free for everyone – no ads and no account.' }) }
 };
-function t(k, o) { var s = (T[prefs.lang] && T[prefs.lang][k]) || T.no[k] || k; if (o) for (var x in o) s = s.split('{' + x + '}').join(o[x]); return s; }
+function t(k, o) { var s = (TILT.L[prefs.lang] && TILT.L[prefs.lang][k]) || (T[prefs.lang] && T[prefs.lang][k]) || T.no[k] || k; if (o) for (var x in o) s = s.split('{' + x + '}').join(o[x]); return s; }
 var TITLES = { no: 'Ufobang | Gratis arkadespill i nettleseren – forsvar jorden', pl: 'Ufobang | Darmowa gra zręcznościowa w przeglądarce – obroń Ziemię', en: 'Ufobang | Free arcade game in your browser – defend the Earth' };
 function gameBase() { return location.pathname.replace(/index\.html$/, '').replace(/(pl|en)\/$/, ''); }
 function fmt(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, prefs.lang === 'en' ? ',' : '\u00a0'); }
@@ -931,12 +979,13 @@ function handle(e) {
 }
 
 /* ---------------- loop ---------------- */
+var tiltFrameDt = 0;
 function frame(ts) {
-  rafOn = false; vtime = ts / 1000; var dt = lastTs ? Math.min(.05, (ts - lastTs) / 1000) : 0; lastTs = ts;
+  rafOn = false; vtime = ts / 1000; var dt = lastTs ? Math.min(.05, (ts - lastTs) / 1000) : 0; lastTs = ts; tiltFrameDt = dt;
   // adaptive resolution: if a slow device can't hold ~60 fps at 3× pixel density, render at 2× (then 1.5×) instead – smoothness first
   if (running && !paused && dt && !manual) { perfN++; perfT += dt; if (perfN >= 90) { if (perfT / perfN > 0.0195 && dprCap > 1.5 && (window.devicePixelRatio || 1) > 1.5) { dprCap = dprCap > 2 ? 2 : 1.5; layout(); } perfN = 0; perfT = 0; } }
   if (running && !paused && g) {
-    if (intro > 0) { intro -= dt; if (intro <= 0) hideBanner(); if (DEBUG && window.__finger) readInput(); if (drag && g.state === 'play') { var bb = pxBounds(); g.px = Math.max(bb[0], Math.min(bb[1], drag.x)); } } // the finger already steers during "Get ready"
+    if (intro > 0) { intro -= dt; if (intro <= 0) hideBanner(); if (DEBUG && window.__finger) readInput(); if (drag && g.state === 'play' && !TILT.active()) { var bb = pxBounds(); g.px = Math.max(bb[0], Math.min(bb[1], drag.x)); } } // the finger already steers during "Get ready"
     else if (hitStop > 0) hitStop -= dt;
     else { acc += dt; var n = 0; readInput(); while (acc >= SK.DT && n < 8) { SK.step(g, input); acc -= SK.DT; n++; var ev = SK.drain(g); for (var i = 0; i < ev.length; i++) handle(ev[i]); if (!running) break; } if (n >= 8) acc = 0; }
     saveT += dt; if (saveT > 2.5) { saveT = 0; if (g.state === 'play') saveGame(); }
@@ -960,6 +1009,8 @@ function readInput() {
   input.left = keys.left || btn.left; input.right = keys.right || btn.right;
   input.fire = keys.fire || btn.fire || prefs.auto || !!drag;                         // one-finger control: fires while the finger is down
   input.targetX = drag ? drag.x : null; input.follow = !!drag;                       // ... and the cannon sits exactly under the finger (1:1)
+  TILT.update(); if (TILT.active() && !input.left && !input.right && g) { // tilt: cannon speed follows the tilt angle; a finger down only fires
+    input.targetX = g.px + TILT.ix * SK.CFG.playerSpeed * 1.35 * Math.max(SK.DT, tiltFrameDt); input.follow = false; }
   if (DEBUG && window.__bot && !window.__finger && g) { var b = window.__bot(g, SK); input.left = false; input.right = false; input.targetX = b.targetX; input.follow = false; input.fire = b.fire; }
 }
 var lastHud = '';
@@ -976,7 +1027,7 @@ function toast(s) { var el = $('toast'); el.textContent = s; el.classList.add('s
 
 /* ---------------- game flow ---------------- */
 function startGame(fresh, wave) {
-  audioInit(); hideAll();
+  TILT.ensure(tiltMsg); TILT.calibrate(); audioInit(); hideAll();
   if (fresh || !g) { g = SK.create({ seed: DEBUG && /[?&]seed=(\d+)/.test(location.search) ? +RegExp.$1 : Date.now(), wave: wave || 1 }); stats.games++; saveStats(); track('start'); lbRunStart(g); }
   running = true; paused = false; acc = 0; lastTs = 0; intro = 1.1; reanchor(); bunkerCache = [];
   banner(t('waveBanner', { w: g.wave }), t('ready')); sfx('start'); saveGame(); updHud(); req();
@@ -1081,6 +1132,12 @@ $('mContinue').onclick = function () { audioInit(); sfx('tap'); hide('menu'); if
 $('mNew').onclick = function () { audioInit(); sfx('tap'); if (!$('mContinue').hidden) { show('confirm'); return; } startGame(true); };
 $('cYes').onclick = function () { hide('confirm'); clearSave(); running = false; g = null; startGame(true); };
 $('cNo').onclick = function () { hide('confirm'); };
+function tiltMsg(k) { var el = $('tiltMsg'); el.textContent = k ? t(k) : ''; el.hidden = !k; }
+function updTilt() { setSw('mTilt', TILT.on); $('mCal').hidden = !TILT.on; }
+TILT.onchange = updTilt;
+$('mTilt').onclick = function () { TILT.toggle(tiltMsg); };
+$('mCal').onclick = function () { TILT.calibrate(); tiltMsg('tiltCal'); };
+updTilt();
 $('mAuto').onclick = function () { prefs.auto = !prefs.auto; savePrefs(); setSw('mAuto', prefs.auto); setBtns(); };
 $('mBtns').onclick = function () { prefs.btns = !prefs.btns; savePrefs(); setSw('mBtns', prefs.btns); setBtns(); layout(); };
 $('mLb').onclick = function () { openLb(); };
