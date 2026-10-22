@@ -1026,7 +1026,7 @@ function hideBanner() { $('banner').classList.remove('show'); bnLeft = 0; }
 function toast(s) { var el = $('toast'); el.textContent = s; el.classList.add('show'); toLeft = 1.7; req(); }
 
 /* ---------------- game flow ---------------- */
-function startGame(fresh, wave) {
+function startGame(fresh, wave) {window.StopWisdom&&StopWisdom.hide();
   TILT.ensure(tiltMsg); TILT.calibrate(); audioInit(); hideAll();
   if (fresh || !g) { g = SK.create({ seed: DEBUG && /[?&]seed=(\d+)/.test(location.search) ? +RegExp.$1 : Date.now(), wave: wave || 1 }); stats.games++; saveStats(); track('start'); lbRunStart(g); }
   running = true; paused = false; acc = 0; lastTs = 0; intro = 1.1; reanchor(); bunkerCache = [];
@@ -1393,5 +1393,7 @@ if (/[?&]nobadge=1/.test(location.search)) document.querySelectorAll('.testbadge
 if (DEBUG && !/nobadge/.test(location.search)) { var dbg = document.createElement('div'); dbg.id = 'dbg'; dbg.textContent = 'debug'; document.body.appendChild(dbg); }
 })();
 </script>
+<script src="https://stop60.no/assets/wisdom.js" defer></script>
+<script>addEventListener("load",function(){window.StopWisdom&&StopWisdom.show({before:document.getElementById("mContinue")})});</script>
 </body>
 </html>
