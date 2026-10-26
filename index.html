@@ -734,7 +734,7 @@ function applyLang() {
   $('mTbl').innerHTML = [['blink', 'Blink', '30'], ['brumm', 'Brumm', '20'], ['gloppo', 'Gloppo', '10'], ['manta', '?', '100–500']].map(function (c) {
     return '<div class="' + (c[0] === 'manta' ? 'my' : '') + '"><img src="' + IMG[c[0] + '_lg'] + '" alt="" /><b>' + c[2] + '</b><small>' + (c[0] === 'manta' ? t('mantaShort') : c[1]) + '</small></div>'; }).join('');
   document.title = LAUNCH ? TITLES[prefs.lang] : t('name') + ' — ' + { no: 'testversjon', pl: 'wersja testowa', en: 'test version' }[prefs.lang];
-  var privHref = gameBase() + { no: 'personvern/', pl: 'prywatnosc/', en: 'en/privacy/' }[prefs.lang], privOn = LAUNCH;
+  var privHref = gameBase() + { no: 'personvern/', pl: 'personvern/', en: 'en/privacy/' }[prefs.lang], privOn = LAUNCH;
   $('fPrivW').hidden = !privOn; $('fPriv').href = privHref;
   $('rulesCard').innerHTML = t('rulesHtml') + '<button class="btn main" id="rClose">' + t('close') + '</button>' + (privOn ? '<p class="rpriv">© 2026 Stop60 · <a class="privl" id="rPriv" href="' + privHref + '">' + t('privacy') + '</a></p>' : '');
   $('rClose').onclick = function () { hide('rules'); };
