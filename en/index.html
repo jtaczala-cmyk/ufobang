@@ -345,6 +345,7 @@ a{color:var(--teal)}
   <p id="overBest"></p>
   <div class="optin" id="oOpt"><label class="lbl2" for="oNick" data-t="nickLbl">Kallenavn</label><div class="nickrow"><input class="nick" id="oNick" type="text" maxlength="16" autocomplete="nickname" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send" /><button class="btn tl" id="oSend" data-t="send">Send</button></div><label class="chk"><input type="checkbox" id="oChk" /><span data-t="optIn">Jeg er 16 år eller eldre (18 i India) og vil vise kallenavn, poeng og bølge på topplisten på nett</span></label><p class="fine"><span data-t="optFine"></span> <a class="privl" data-t="privacy" href="/ufobang/personvern/">Personvern</a></p><div id="oLbRow"><p class="lbmsg" id="oMsg" role="status" aria-live="polite"></p><button type="button" id="oLbOpen" data-t="lbSee">Se topplisten</button></div></div>
   <button class="btn main" id="oAgain" data-t="again">Spill igjen</button>
+  <button class="btn" id="oScoreShare" data-t="shareScore">Share result</button>
   <div id="overShare"><button type="button" class="qrfig" id="oQr"><span class="qrsvg" id="oQrSvg"></span></button><div class="col"><small data-t="qrShare">Skann og spill – del videre</small><button class="btn tl" id="oShare"><svg class="shico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-t="share">Del spillet</span></button><button class="btn" id="oMenu" data-t="toMenu">Meny</button></div></div>
 </div></div>
 
@@ -646,7 +647,7 @@ var T = {
     needOpt: 'Kryss av for topplisten først.', lbNoScore: 'Ingen poeng å sende i denne runden.', lbOffHint: 'Vil du være med? Skriv et kallenavn og kryss av – da sendes resultatet etter hvert spill.', lbOnHint: 'Du er med: resultatet sendes etter hvert spill.',
     nickShort: 'Skriv et kallenavn (2–16 tegn).', nickChars: 'Tillatt: bokstaver, tall, mellomrom og . _ \' - (start med bokstav eller tall).', nickBad: 'Det kallenavnet er ikke tillatt – velg et annet.',
     autofire: 'Autoskyting', autofireSub: 'For knapper og tastatur: kanonen skyter av seg selv', free: 'Laget med lidenskap – gratis for alle',
-    qrLabel: 'Skann og spill', qrShare: 'Skann og spill – del videre', share: 'Del spillet', shareTxt: 'Skann koden med kameraet på telefonen for å åpne spillet.', shareBtn: 'Del …', copy: 'Kopier lenke', copied: 'Kopiert!', close2: 'Lukk',
+    qrLabel: 'Skann og spill', qrShare: 'Skann og spill – del videre', share: 'Del spillet', shareScore: 'Del resultatet', shareScoreTxt: 'Jeg fikk {score} poeng i Ufobang – slår du meg? {url}', shareScoreOk: 'Kopiert!', shareTxt: 'Skann koden med kameraet på telefonen for å åpne spillet.', shareBtn: 'Del …', copy: 'Kopier lenke', copied: 'Kopiert!', close2: 'Lukk',
     paused: 'Pause', pausedT: 'Spillet står stille', resume: 'Fortsett',
     waveBanner: 'Bølge {w}', ready: 'Gjør deg klar!', cleared: 'Bølge {w} slått tilbake!', winTxt: 'Jorden er trygg – for nå. Neste bølge starter litt lavere og skyter mer.', nextWave: 'Neste bølge', nextSub: 'Bølge {w}',
     newBest: 'Ny rekord: {s} poeng!', bestIs: 'Rekord: {s} poeng', overTitle: 'Spillet er over', overInv: 'Romvesenene landet – jorden må vente på en ny helt.', overLives: 'Kanonen er slått ut. Prøv igjen – du blir bedre for hver runde!',
@@ -673,7 +674,7 @@ var T = {
     needOpt: 'Najpierw zaznacz pole rankingu.', lbNoScore: 'W tej rundzie nie ma punktów do wysłania.', lbOffHint: 'Chcesz dołączyć? Wpisz nick i zaznacz pole – wynik będzie wysyłany po każdej grze.', lbOnHint: 'Bierzesz udział: wynik jest wysyłany po każdej grze.',
     nickShort: 'Wpisz nick (2–16 znaków).', nickChars: 'Dozwolone: litery, cyfry, spacja i . _ \' - (na początku litera lub cyfra).', nickBad: 'Ten nick jest niedozwolony – wybierz inny.',
     autofire: 'Autostrzał', autofireSub: 'Przy przyciskach i klawiaturze: działo strzela samo', free: 'Stworzone z pasji – za darmo dla wszystkich',
-    qrLabel: 'Zeskanuj i graj', qrShare: 'Zeskanuj i graj – podaj dalej', share: 'Udostępnij grę', shareTxt: 'Zeskanuj kod aparatem telefonu, aby otworzyć grę.', shareBtn: 'Udostępnij…', copy: 'Kopiuj link', copied: 'Skopiowano!', close2: 'Zamknij',
+    qrLabel: 'Zeskanuj i graj', qrShare: 'Zeskanuj i graj – podaj dalej', share: 'Udostępnij grę', shareScore: 'Udostępnij wynik', shareScoreTxt: 'Zrobiłem {score} pkt w Ufobang – pobijesz? {url}', shareScoreOk: 'Skopiowano!', shareTxt: 'Zeskanuj kod aparatem telefonu, aby otworzyć grę.', shareBtn: 'Udostępnij…', copy: 'Kopiuj link', copied: 'Skopiowano!', close2: 'Zamknij',
     paused: 'Pauza', pausedT: 'Gra wstrzymana', resume: 'Graj dalej',
     waveBanner: 'Fala {w}', ready: 'Przygotuj się!', cleared: 'Fala {w} odparta!', winTxt: 'Ziemia jest bezpieczna – na razie. Następna fala zacznie trochę niżej i będzie strzelać częściej.', nextWave: 'Następna fala', nextSub: 'Fala {w}',
     newBest: 'Nowy rekord: {s} pkt!', bestIs: 'Rekord: {s} pkt', overTitle: 'Koniec gry', overInv: 'Kosmici wylądowali – Ziemia czeka na nowego bohatera.', overLives: 'Działo zostało zniszczone. Spróbuj jeszcze raz – z każdą rundą idzie lepiej!',
@@ -700,7 +701,7 @@ var T = {
     needOpt: 'Tick the leaderboard box first.', lbNoScore: 'No points to post from this round.', lbOffHint: 'Want in? Enter a nickname and tick the box – your score is then posted after each game.', lbOnHint: 'You’re in: your score is posted after each game.',
     nickShort: 'Enter a nickname (2–16 characters).', nickChars: 'Allowed: letters, digits, spaces and . _ \' - (start with a letter or digit).', nickBad: 'That nickname isn’t allowed – pick another one.',
     autofire: 'Auto-fire', autofireSub: 'For buttons and keyboard: the cannon fires by itself', free: 'Made with passion – free for everyone',
-    qrLabel: 'Scan & play', qrShare: 'Scan & play – pass it on', share: 'Share the game', shareTxt: 'Scan the code with your phone camera to open the game.', shareBtn: 'Share…', copy: 'Copy link', copied: 'Copied!', close2: 'Close',
+    qrLabel: 'Scan & play', qrShare: 'Scan & play – pass it on', share: 'Share the game', shareScore: 'Share result', shareScoreTxt: 'I scored {score} points in Ufobang – can you beat me? {url}', shareScoreOk: 'Copied!', shareTxt: 'Scan the code with your phone camera to open the game.', shareBtn: 'Share…', copy: 'Copy link', copied: 'Copied!', close2: 'Close',
     paused: 'Paused', pausedT: 'The game is on hold', resume: 'Resume',
     waveBanner: 'Wave {w}', ready: 'Get ready!', cleared: 'Wave {w} repelled!', winTxt: 'Earth is safe – for now. The next wave starts a little lower and fires more often.', nextWave: 'Next wave', nextSub: 'Wave {w}',
     newBest: 'New best: {s} points!', bestIs: 'Best: {s} points', overTitle: 'Game over', overInv: 'The aliens have landed – Earth awaits a new hero.', overLives: 'Your cannon is down. Try again – you get better every round!',
@@ -1168,6 +1169,15 @@ $('sClose').onclick = function () { hide('share'); };
 $('sNative').onclick = function () { if (navigator.share) navigator.share({ title: t('name') + ' – ' + t('tagline'), text: t('name') + ' – ' + t('tagline'), url: gameURL() }).catch(function () {}); };
 $('sCopy').onclick = function () { copyText(gameURL()).then(function () { $('sCopy').textContent = t('copied'); setTimeout(function () { $('sCopy').textContent = t('copy'); }, 1600); }); };
 
+/* share the score: native share sheet, otherwise copy the sentence. gameBase() drops /en/ and /pl/, so the public language URL is built here (no query, no UTM). */
+function scoreShareURL() { return 'https://stop60.no/ufobang/' + ({ en: 'en/', pl: 'pl/' }[prefs.lang] || ''); }
+function scoreShareText() { var b = $('oScoreShare'), sc = b && b.getAttribute('data-score'); if (sc == null || sc === '') sc = (g && g.score != null) ? g.score : 0; return t('shareScoreTxt', { score: sc, url: scoreShareURL() }); }
+$('oScoreShare').onclick = function () { var b = $('oScoreShare'), txt = scoreShareText();
+  b.textContent = t('shareScore');
+  function copy() { copyText(txt).then(function () { b.textContent = t('shareScoreOk'); setTimeout(function () { if (b.textContent === t('shareScoreOk')) b.textContent = t('shareScore'); }, 1600); }); }
+  if (navigator.share) navigator.share({ title: t('name'), text: txt }).catch(function (e) { if (!e || e.name !== 'AbortError') copy(); }); else copy();
+  try { track('share-score'); } catch (e2) {} };
+
 /* ---------------- wave cleared (win) ---------------- */
 function fillWin() {
   if (!g) return; $('winTitle').textContent = t('cleared', { w: g.wave }); $('winTxt').textContent = t('winTxt');
@@ -1185,6 +1195,7 @@ function fillOver(gg, newBest) {
   $('overTitle').textContent = t('overTitle'); $('overTxt').textContent = t(gg.overReason === 'invasion' ? 'overInv' : 'overLives');
   $('osScore').textContent = fmt(gg.score); $('osWave').textContent = gg.wave; $('osKills').textContent = gg.kills;
   $('overBest').textContent = newBest ? t('newBest', { s: fmt(gg.score) }) : t('bestIs', { s: fmt(stats.best) });
+  $('oScoreShare').textContent = t('shareScore'); $('oScoreShare').setAttribute('data-score', String(gg.score));
 }
 function openOver(gg, newBest) { dragEnd(); lastOver = [gg, newBest]; fillOver(gg, newBest); hideAll(); show('over'); onlineOver(gg); if (newBest) confetti(); }
 $('oAgain').onclick = function () { audioInit(); hide('over'); g = null; startGame(true); };
@@ -1324,7 +1335,7 @@ $('lNick').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e
 setTimeout(lbFlush, 3000);
 /* ---------------- analytics (launch build only): GoatCounter, cookie-free, self-hosted count.js (ISC) ----------------
    same setup as the other Stop60 games: one page view per load (/ufobang/, /ufobang/pl/, /ufobang/en/) + events ufobang-start, ufobang-wave-<n> (wave n cleared, n ≤ 10),
-   ufobang-over-w<n> (game over in wave n) and ufobang-share. Events go out after a random 0–15 s delay, pending ones are flushed when the page is hidden.
+   ufobang-over-w<n> (game over in wave n), ufobang-share and ufobang-share-score. Events go out after a random 0–15 s delay, pending ones are flushed when the page is hidden.
    Off in test builds and with ?debug=1 (unless &gctest=1, used by tools/launchverify.js). */
 var GC_CODE = 'jtaczala-games', gcOn = LAUNCH && (!DEBUG || /[?&]gctest=1/.test(location.search)), gcPend = [];
 if (gcOn) {
