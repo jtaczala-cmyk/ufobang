@@ -262,6 +262,19 @@ a{color:var(--teal)}
 #oLbOpen{font:600 13px/1 var(--disp);letter-spacing:.06em;color:var(--teal2);padding:8px 2px;white-space:nowrap;text-decoration:underline;text-underline-offset:3px}
 @media (max-height:700px){#overMark{display:none}#overTxt{display:none}#over .stats{margin-top:4px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* 2026-11-13: use the landscape width, keep Start tappable, hide phone QR on phones */
+#menu.ov{pointer-events:none}
+#menu.ov .card{pointer-events:auto;overflow:auto;-webkit-overflow-scrolling:touch;max-height:100%}
+#langBtn,.ibtn,#muteBtn,#pauseBtn,#menuBtn{min-width:44px;min-height:44px;width:44px;height:44px}
+@media (orientation:landscape) and (max-height:560px){
+  #app{max-width:none;width:100%;height:100dvh;height:100vh}
+  #top{padding-top:2px}
+  #menu .seo-lead{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;max-height:3.1em}
+}
+@media (max-width:900px), (pointer:coarse){
+  .qrfig, #mQr, #wQr{display:none !important}
+}
 </style>
 </head>
 <body>
@@ -270,7 +283,7 @@ a{color:var(--teal)}
     <div class="brand"><svg class="mark" viewBox="0 0 30 30" aria-hidden="true"><rect x="1" y="1" width="28" height="28" rx="7" fill="#12110f" stroke="#f5f1e8" stroke-width="2"/><path d="M6 21v-6a9 9 0 0 1 18 0v6h-5v-3a4 4 0 0 0-8 0v3z" fill="#2dd4bf"/><path d="M14 4h2v7h-2z" fill="#e11d2a"/><circle cx="15" cy="12.5" r="1.6" fill="#fde2e2"/></svg>
       <div class="bname"><b id="bName">Ufobang</b><small>Stop60</small></div></div>
     <button class="ibtn" id="langBtn" aria-label="Language">NO</button>
-    <button class="ibtn" id="muteBtn" aria-label="Sound" aria-pressed="false"></button>
+    <button class="ibtn" id="muteBtn" aria-label="Dźwięk" aria-pressed="false"></button>
     <button class="ibtn" id="pauseBtn" aria-label="Pause"><svg viewBox="0 0 24 24"><path d="M9 6v12M15 6v12"/></svg></button>
     <button class="ibtn" id="menuBtn" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h14"/></svg></button>
   </header>
@@ -1405,7 +1418,7 @@ if (/[?&]nobadge=1/.test(location.search)) document.querySelectorAll('.testbadge
 if (DEBUG && !/nobadge/.test(location.search)) { var dbg = document.createElement('div'); dbg.id = 'dbg'; dbg.textContent = 'debug'; document.body.appendChild(dbg); }
 })();
 </script>
-<script src="https://stop60.no/assets/wisdom.js" defer></script>
-<script>addEventListener("load",function(){window.StopWisdom&&StopWisdom.show({before:document.getElementById("mContinue")})});</script>
+<script src="https://stop60.no/assets/wisdom.js?v=2" defer></script>
+<script>addEventListener("load",function(){window.StopWisdom&&StopWisdom.show({after:document.getElementById("mShareRow")||document.getElementById("mNew")||document.getElementById("mContinue")})});</script>
 </body>
 </html>
