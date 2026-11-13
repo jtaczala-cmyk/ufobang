@@ -218,6 +218,7 @@ a{color:var(--teal)}
 .stats b{display:block;font:600 22px/1 var(--disp);color:var(--ink);font-variant-numeric:tabular-nums}
 .stats small{display:block;font-size:11px;color:var(--mut);margin-top:4px}
 #winBest,#overBest{font-size:13px!important;color:var(--teal2)!important;min-height:1em}
+#overGrid{display:block;margin:8px auto 4px;padding:10px 12px;max-width:16em;background:var(--bg);border:1px solid var(--line);border-radius:12px;font:600 18px/1.4 ui-monospace,Menlo,monospace;white-space:pre-wrap;text-align:center;letter-spacing:.04em;cursor:pointer;color:var(--ink)}#overGrid[hidden]{display:none}
 #pause .card{text-align:center}
 #confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:21}
 #mCal[hidden],#tiltMsg[hidden]{display:none}
@@ -369,6 +370,7 @@ a{color:var(--teal)}
   <p id="overTxt"></p>
   <div class="stats"><div><b id="osScore">0</b><small data-t="score">Score</small></div><div><b id="osWave">1</b><small data-t="waveReached">Wave</small></div><div><b id="osKills">0</b><small data-t="kills">Aliens</small></div></div>
   <p id="overBest"></p>
+  <pre id="overGrid" hidden></pre>
   <div class="optin" id="oOpt"><label class="lbl2" for="oNick" data-t="nickLbl">Nickname</label><div class="nickrow"><input class="nick" id="oNick" type="text" maxlength="16" autocomplete="nickname" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send" /><button class="btn tl" id="oSend" data-t="send">Post</button></div><label class="chk"><input type="checkbox" id="oChk" /><span data-t="optIn">I am 16 or older (18 or older in India) and want my nickname, score and wave shown on the online leaderboard</span></label><p class="fine"><span data-t="optFine">Nickname, score and wave become public. Don’t use your real name or e-mail.</span> <a class="privl" data-t="privacy" href="/ufobang/personvern/">Privacy</a></p><div id="oLbRow"><p class="lbmsg" id="oMsg" role="status" aria-live="polite"></p><button type="button" id="oLbOpen" data-t="lbSee">See the leaderboard</button></div></div>
   <button class="btn main" id="oAgain" data-t="again">Play again</button>
   <button class="btn" id="oScoreShare" data-t="shareScore">Share result</button>
@@ -1195,9 +1197,23 @@ $('sClose').onclick = function () { hide('share'); };
 $('sNative').onclick = function () { if (navigator.share) navigator.share({ title: t('name') + ' – ' + t('tagline'), text: t('name') + ' – ' + t('tagline'), url: gameURL() }).catch(function () {}); };
 $('sCopy').onclick = function () { copyText(gameURL()).then(function () { $('sCopy').textContent = t('copied'); setTimeout(function () { $('sCopy').textContent = t('copy'); }, 1600); }); };
 
-/* share the score: native share sheet, otherwise copy the sentence. gameBase() drops /en/ and /pl/, so the public language URL is built here (no query, no UTM). */
-function scoreShareURL() { return 'https://stop60.no/ufobang/' + ({ en: 'en/', pl: 'pl/' }[prefs.lang] || ''); }
-function scoreShareText() { var b = $('oScoreShare'), sc = b && b.getAttribute('data-score'); if (sc == null || sc === '') sc = (g && g.score != null) ? g.score : 0; return t('shareScoreTxt', { score: sc, url: scoreShareURL() }); }
+/* share the score as a spoiler-free emoji bar (waves reached), like Ren logikk. Public language path, no query, no UTM. */
+function scoreSharePath() { return 'stop60.no/ufobang' + ({ en: '/en', pl: '/pl' }[prefs.lang] || ''); }
+function scoreShareURL() { return 'https://' + scoreSharePath() + '/'; }
+function scoreEmojiBar(n, ch) { n = Math.max(0, Math.floor(+n || 0)); if (n <= 0) return '\u2B1B'; if (n <= 10) return new Array(n + 1).join(ch); return new Array(11).join(ch) + '\u00d7' + n; }
+function scoreShareText() { var b = $('oScoreShare'), sc = b && b.getAttribute('data-score'), w = b && b.getAttribute('data-wave'); if (sc == null || sc === '') sc = (g && g.score != null) ? g.score : 0; if (w == null || w === '') w = (g && g.wave != null) ? g.wave : 0; return t('name') + '\n' + scoreEmojiBar(w, '\uD83D\uDEF8') + '\n' + sc + '\n' + scoreSharePath(); }
+function paintOverGrid() { var grid = $('overGrid'); if (!grid) return; grid.textContent = scoreShareText(); grid.hidden = false; }
+
+(function () {
+  var grid = $('overGrid');
+  if (!grid || grid.getAttribute('data-bound')) return;
+  grid.setAttribute('data-bound', '1');
+  grid.setAttribute('role', 'button');
+  grid.tabIndex = 0;
+  function go() { var b = $('oScoreShare'); if (b) b.click(); }
+  grid.addEventListener('click', go);
+  grid.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+})();
 $('oScoreShare').onclick = function () { var b = $('oScoreShare'), txt = scoreShareText();
   b.textContent = t('shareScore');
   function copy() { copyText(txt).then(function () { b.textContent = t('shareScoreOk'); setTimeout(function () { if (b.textContent === t('shareScoreOk')) b.textContent = t('shareScore'); }, 1600); }); }
@@ -1221,7 +1237,7 @@ function fillOver(gg, newBest) {
   $('overTitle').textContent = t('overTitle'); $('overTxt').textContent = t(gg.overReason === 'invasion' ? 'overInv' : 'overLives');
   $('osScore').textContent = fmt(gg.score); $('osWave').textContent = gg.wave; $('osKills').textContent = gg.kills;
   $('overBest').textContent = newBest ? t('newBest', { s: fmt(gg.score) }) : t('bestIs', { s: fmt(stats.best) });
-  $('oScoreShare').textContent = t('shareScore'); $('oScoreShare').setAttribute('data-score', String(gg.score));
+  $('oScoreShare').textContent = t('shareScore'); $('oScoreShare').setAttribute('data-score', String(gg.score)); $('oScoreShare').setAttribute('data-wave', String(gg.wave)); paintOverGrid();
 }
 function openOver(gg, newBest) { dragEnd(); lastOver = [gg, newBest]; fillOver(gg, newBest); hideAll(); show('over'); onlineOver(gg); if (newBest) confetti(); }
 $('oAgain').onclick = function () { audioInit(); hide('over'); g = null; startGame(true); };
