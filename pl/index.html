@@ -1055,11 +1055,13 @@ function hideBanner() { $('banner').classList.remove('show'); bnLeft = 0; }
 function toast(s) { var el = $('toast'); el.textContent = s; el.classList.add('show'); toLeft = 1.7; req(); }
 
 /* ---------------- game flow ---------------- */
-function startGame(fresh, wave) {window.StopWisdom&&StopWisdom.hide();
+function startGame(fresh, wave, opts) {window.StopWisdom&&StopWisdom.hide();
   TILT.ensure(tiltMsg); TILT.calibrate(); audioInit(); hideAll();
   if (fresh || !g) { g = SK.create({ seed: DEBUG && /[?&]seed=(\d+)/.test(location.search) ? +RegExp.$1 : Date.now(), wave: wave || 1 }); stats.games++; saveStats(); track('start'); lbRunStart(g); }
-  running = true; paused = false; acc = 0; lastTs = 0; intro = 1.1; reanchor(); bunkerCache = [];
-  banner(t('waveBanner', { w: g.wave }), t('ready')); sfx('start'); saveGame(); updHud(); req();
+  var quick = !!(opts && opts.quick); // game-over "play again" only: back in control at once
+  running = true; paused = false; acc = 0; lastTs = 0; intro = quick ? 0 : 1.1; reanchor(); bunkerCache = [];
+  if (quick) hideBanner(); else banner(t('waveBanner', { w: g.wave }), t('ready'));
+  sfx('start'); saveGame(); updHud(); req();
 }
 function nextWave() { SK.nextWave(g); bunkerCache = []; hideAll(); running = true; paused = false; intro = 1.1; acc = 0; lastTs = 0; banner(t('waveBanner', { w: g.wave }), t('ready')); sfx('start'); saveGame(); updHud(); req(); }
 function pauseGame(show) { if (!running || paused) { if (show && running) showPause(); return; } paused = true; ufoStop(); saveGame(); keys.left = keys.right = keys.fire = false; btn.left = btn.right = btn.fire = false; dragEnd(); setBtns(); if (show) showPause(); }
@@ -1240,7 +1242,7 @@ function fillOver(gg, newBest) {
   $('oScoreShare').textContent = t('shareScore'); $('oScoreShare').setAttribute('data-score', String(gg.score)); $('oScoreShare').setAttribute('data-wave', String(gg.wave)); paintOverGrid();
 }
 function openOver(gg, newBest) { dragEnd(); lastOver = [gg, newBest]; fillOver(gg, newBest); hideAll(); show('over'); onlineOver(gg); if (newBest) confetti(); }
-$('oAgain').onclick = function () { audioInit(); hide('over'); g = null; startGame(true); };
+$('oAgain').onclick = function () { audioInit(); hide('over'); g = null; startGame(true, 1, { quick: true }); };
 $('oMenu').onclick = function () { hide('over'); g = null; openMenu(); };
 
 /* ---------------- confetti (wave cleared / new best) ---------------- */
