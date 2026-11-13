@@ -1068,7 +1068,7 @@ function showPause() { $('pTitle').textContent = t('pausedT'); show('pause'); }
 function gameOver() {
   running = false; var newBest = g.score > stats.best; if (newBest) stats.best = g.score; stats.bestWave = Math.max(stats.bestWave, g.wave); saveStats(); clearSave();
   track('over-w' + Math.min(g.wave, 10)); var gg = g;
-  clearTimeout(overTimer); overTimer = setTimeout(function () { openOver(gg, newBest); }, 1300); req();
+  clearTimeout(overTimer); overTimer = setTimeout(function () { openOver(gg, newBest); }, 200); req();
 }
 
 /* ---------------- input ---------------- */
