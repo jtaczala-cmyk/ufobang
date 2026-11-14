@@ -217,7 +217,7 @@ a{color:var(--teal)}
 .stats div{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:8px 4px}
 .stats b{display:block;font:600 22px/1 var(--disp);color:var(--ink);font-variant-numeric:tabular-nums}
 .stats small{display:block;font-size:11px;color:var(--mut);margin-top:4px}
-#winBest,#overBest{font-size:13px!important;color:var(--teal2)!important;min-height:1em}
+#winBest,#overBest,#overDaily{font-size:13px!important;color:var(--teal2)!important;min-height:1em}
 #overGrid{display:block;margin:8px auto 4px;padding:10px 12px;max-width:16em;background:var(--bg);border:1px solid var(--line);border-radius:12px;font:600 18px/1.4 ui-monospace,Menlo,monospace;white-space:pre-wrap;text-align:center;letter-spacing:.04em;cursor:pointer;color:var(--ink)}#overGrid[hidden]{display:none}
 #pause .card{text-align:center}
 #confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:21}
@@ -328,6 +328,7 @@ a{color:var(--teal)}
   <p id="mBest"></p>
   <button class="btn main" id="mContinue" hidden><span class="bt"><span data-t="continue">Kontynuuj grę</span><small id="mContInfo"></small></span></button>
   <button class="btn" id="mNew"><span class="bt"><span data-t="newGame">Nowa gra</span><small data-t="newGameSub">Fala 1 · 3 życia</small></span></button>
+  <button class="btn tl" id="mDaily"><span class="bt"><span data-t="daily">Dzienna fala</span><small data-t="dailySub">Ta sama dla wszystkich dziś</small></span></button>
   <button class="tg" id="mAuto" role="switch" aria-checked="false"><span><span data-t="autofire">Autostrzał</span><small data-t="autofireSub">Przy przyciskach i klawiaturze: działo strzela samo</small></span><i class="sw"></i></button>
   <button class="tg" id="mBtns" role="switch" aria-checked="false"><span><span data-t="btnMode">Przyciski zamiast przesuwania</span><small data-t="btnModeSub">◀ ▶ i przycisk Strzał pod planszą</small></span><i class="sw"></i></button>
   <button class="tg" id="mTilt" role="switch" aria-checked="false"><span><span data-t="tilt">Styr med vipping</span><small data-t="tiltSub"></small></span><i class="sw"></i></button>
@@ -370,6 +371,7 @@ a{color:var(--teal)}
   <p id="overTxt"></p>
   <div class="stats"><div><b id="osScore">0</b><small data-t="score">Punkty</small></div><div><b id="osWave">1</b><small data-t="waveReached">Fala</small></div><div><b id="osKills">0</b><small data-t="kills">Kosmici</small></div></div>
   <p id="overBest"></p>
+  <p id="overDaily" hidden></p>
   <pre id="overGrid" hidden></pre>
   <div class="optin" id="oOpt"><label class="lbl2" for="oNick" data-t="nickLbl">Nick</label><div class="nickrow"><input class="nick" id="oNick" type="text" maxlength="16" autocomplete="nickname" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send" /><button class="btn tl" id="oSend" data-t="send">Wyślij</button></div><label class="chk"><input type="checkbox" id="oChk" /><span data-t="optIn">Mam co najmniej 16 lat (18 w Indiach) i chcę pokazać nick, punkty i falę w rankingu online</span></label><p class="fine"><span data-t="optFine">Nick, punkty i fala będą publiczne. Nie używaj imienia i nazwiska ani e-maila.</span> <a class="privl" data-t="privacy" href="/ufobang/personvern/">Prywatność</a></p><div id="oLbRow"><p class="lbmsg" id="oMsg" role="status" aria-live="polite"></p><button type="button" id="oLbOpen" data-t="lbSee">Zobacz ranking</button></div></div>
   <button class="btn main" id="oAgain" data-t="again">Zagraj ponownie</button>
@@ -466,7 +468,7 @@ function newWave(g) {
 function create(o) {
   o = o || {};
   var g = { W: W, H: H, seed: rng(o.seed == null ? Date.now() : o.seed), wave: o.wave || 1, score: 0, lives: CFG.lives, nextLife: CFG.extraFirst, t: 0,
-    px: W / 2, cool: 0, kills: 0, shots: 0, hits: 0, mysteryHits: 0, mysteryN: 0, events: [], over: false, overReason: '' };
+    px: W / 2, cool: 0, kills: 0, shots: 0, hits: 0, mysteryHits: 0, mysteryN: 0, events: [], over: false, overReason: '', daily: !!o.daily, dailyKey: o.daily ? (o.dailyKey | 0) : 0 };
   newWave(g); return g;
 }
 function alive(g) { var n = 0; for (var i = 0; i < g.aliens.length; i++) if (g.aliens[i].alive) n++; return n; }
@@ -570,7 +572,7 @@ function unpackMask(s, len) { var m = new Uint8Array(len), cur = s[0] === '1' ? 
 function snapshot(g) {
   return JSON.stringify({ v: 1, seed: g.seed, wave: g.wave, score: g.score, lives: g.lives, nextLife: g.nextLife, px: g.px, kills: g.kills, shots: g.shots, hits: g.hits, mysteryHits: g.mysteryHits,
     a: g.aliens.map(function (a) { return a.alive ? 1 : 0; }).join(''), fx: g.fx, fy: g.fy, dir: g.dir, speedMul: g.speedMul, drops: g.drops, mysteryT: g.mysteryT, mysteryN: g.mysteryN,
-    b: g.bunkers.map(function (b) { return packMask(b.m); }), state: g.state === 'waveEnd' || g.state === 'cleared' ? 'waveEnd' : 'play', t: g.t, waveShots: g.waveShots, waveHits: g.waveHits });
+    b: g.bunkers.map(function (b) { return packMask(b.m); }), state: g.state === 'waveEnd' || g.state === 'cleared' ? 'waveEnd' : 'play', t: g.t, waveShots: g.waveShots, waveHits: g.waveHits, daily: g.daily ? 1 : 0, dailyKey: g.dailyKey | 0 });
 }
 function restore(str) {
   var d = typeof str === 'string' ? JSON.parse(str) : str; if (!d || d.v !== 1) return null;
@@ -578,7 +580,7 @@ function restore(str) {
   ['score', 'lives', 'nextLife', 'px', 'kills', 'shots', 'hits', 'mysteryHits', 'fx', 'fy', 'dir', 'speedMul', 'drops', 'mysteryT', 'mysteryN', 't', 'waveShots', 'waveHits'].forEach(function (k) { if (d[k] != null) g[k] = d[k]; });
   g.aliens.forEach(function (a, i) { a.alive = d.a[i] === '1'; });
   g.bunkers.forEach(function (b, i) { if (d.b[i]) b.m = unpackMask(d.b[i], b.w * b.h); });
-  g.state = d.state === 'waveEnd' ? 'waveEnd' : 'play'; g.bombs = []; g.shot = null; g.mystery = null; return g;
+  g.state = d.state === 'waveEnd' ? 'waveEnd' : 'play'; g.daily = !!(d.daily && (d.dailyKey | 0)); g.dailyKey = g.daily ? (d.dailyKey | 0) : 0; g.bombs = []; g.shot = null; g.mystery = null; return g;
 }
 var api = { W: W, H: H, DT: DT, SUB: SUB, COLS: COLS, ROWS: ROWS, CELL_X: CELL_X, CELL_Y: CELL_Y, TYPES: TYPES, CFG: CFG,
   create: create, step: step, drain: drain, nextWave: nextWave, alive: alive, alienPos: alienPos, alienBox: alienBox, bounds: bounds, stepInterval: stepInterval,
@@ -667,7 +669,7 @@ var PTS = {
 var T = {
   no: { name: 'Ufobang', tagline: 'Forsvar jorden', test: 'TESTVERSJON', privacy: 'Personvern', sndLbl: 'Lyd', howTo: 'Slik spiller du', toMenu: 'Meny', close: 'Skjønner', pauseLbl: 'Pause',
     score: 'Poeng', wave: 'Bølge', hi: 'Rekord', fire: 'Skyt', livesLbl: 'Liv igjen', accuracy: 'Treffsikkerhet', waveReached: 'Bølge', kills: 'Romvesener',
-    continue: 'Fortsett spillet', contInfo: 'Bølge {w} · {s} poeng · {l} liv', newGame: 'Nytt spill', newGameSub: 'Bølge 1 · 3 liv', best: 'Rekord: {s} poeng · beste bølge: {w}', bestNone: 'Ingen rekord ennå – lykke til!',
+    continue: 'Fortsett spillet', contInfo: 'Bølge {w} · {s} poeng · {l} liv', newGame: 'Nytt spill', newGameSub: 'Bølge 1 · 3 liv', daily: 'Dagens bølge', dailySub: 'Samme for alle i dag', dailyBest: 'Dagens rekord', best: 'Rekord: {s} poeng · beste bølge: {w}', bestNone: 'Ingen rekord ennå – lykke til!',
     padHint: 'Dra fingeren her', padSub: 'Kanonen følger fingeren og skyter mens du holder', btnMode: 'Knapper i stedet for å dra', btnModeSub: '◀ ▶ og en Skyt-knapp under brettet',
     lb: 'Toppliste', lbKick: 'På nett', tabAll: 'Topp 50', tabDay: 'I dag', tabWeek: 'Denne uka', lbSee: 'Se topplisten', lbLoading: 'Laster …', lbEmpty: 'Ingen resultater her ennå – bli den første!', lbDown: 'Topplisten kan ikke nås akkurat nå. Spillet virker som vanlig.',
     lbNote: 'Beste resultat per kallenavn.', lbWaveN: 'bølge {w}', nickLbl: 'Kallenavn', nickPh: 'f.eks. Romvakt', optIn: 'Jeg er 16 år eller eldre (18 i India) og vil vise kallenavn, poeng og bølge på topplisten på nett', optFine: 'Kallenavn, poeng og bølge blir offentlige. Ikke bruk ekte navn eller e-post.',
@@ -690,11 +692,11 @@ var T = {
         ['Poeng og liv', ['Blink 30, Brumm 20 og Gloppo 10 poeng.', 'Du har 3 liv. Ekstra liv ved 1 500 poeng og deretter for hver 5 000.', 'Hver ny bølge starter litt lavere. Spillet er over når du mister alle liv eller romvesenene når kanonen.']],
         ['Toppliste på nett', 'Vil du konkurrere? Skriv et kallenavn og kryss av for «Jeg er 16 år eller eldre (18 i India) og vil vise kallenavn, poeng og bølge på topplisten på nett» (det er av til du slår det på). Da sendes kallenavn, poeng, bølge og antall romvesener etter hvert spill, og du kan se topp 50 – totalt, i dag og denne uka. Spillet virker helt uten topplisten. Topplisten på nett er bare for deg som er 16 år eller eldre (18 i India).'],
         ['Blinkende lys', 'Spillet har eksplosjoner og blinkende lys. Har du epilepsi eller er følsom for lysblink, snakk med en lege før du spiller, og ta pause med en gang hvis du blir svimmel eller uvel.'],
-        ['Lagring', 'Spillet lagres automatisk på enheten, sammen med rekorden din. Når siden er lastet, virker spillet også uten nett.']],
+        ['Lagring', 'Spillet lagres automatisk på enheten, sammen med rekorden din. Dagens bølge har sin egen dagsrekord og en streak, også bare på enheten. Når siden er lastet, virker spillet også uten nett.']],
       about: 'Ufobang er et eget romspill fra Stop60. Laget med lidenskap og gratis for alle – ingen reklame og ingen konto.' }) },
   pl: { name: 'Ufobang', tagline: 'Obroń Ziemię', test: 'WERSJA TESTOWA', privacy: 'Prywatność', sndLbl: 'Dźwięk', howTo: 'Jak grać', toMenu: 'Menu', close: 'Rozumiem', pauseLbl: 'Pauza',
     score: 'Punkty', wave: 'Fala', hi: 'Rekord', fire: 'Strzał', livesLbl: 'Życia', accuracy: 'Celność', waveReached: 'Fala', kills: 'Kosmici',
-    continue: 'Kontynuuj grę', contInfo: 'Fala {w} · {s} pkt · życia: {l}', newGame: 'Nowa gra', newGameSub: 'Fala 1 · 3 życia', best: 'Rekord: {s} pkt · najlepsza fala: {w}', bestNone: 'Jeszcze bez rekordu – powodzenia!',
+    continue: 'Kontynuuj grę', contInfo: 'Fala {w} · {s} pkt · życia: {l}', newGame: 'Nowa gra', newGameSub: 'Fala 1 · 3 życia', daily: 'Dzienna fala', dailySub: 'Ta sama dla wszystkich dziś', dailyBest: 'Rekord dnia', best: 'Rekord: {s} pkt · najlepsza fala: {w}', bestNone: 'Jeszcze bez rekordu – powodzenia!',
     padHint: 'Przesuwaj palcem tutaj', padSub: 'Działo podąża za palcem i strzela, gdy trzymasz', btnMode: 'Przyciski zamiast przesuwania', btnModeSub: '◀ ▶ i przycisk Strzał pod planszą',
     lb: 'Ranking', lbKick: 'Online', tabAll: 'Top 50', tabDay: 'Dziś', tabWeek: 'Ten tydzień', lbSee: 'Zobacz ranking', lbLoading: 'Wczytuję…', lbEmpty: 'Jeszcze brak wyników – bądź pierwszy!', lbDown: 'Ranking jest teraz niedostępny. Gra działa normalnie.',
     lbNote: 'Najlepszy wynik każdego nicku.', lbWaveN: 'fala {w}', nickLbl: 'Nick', nickPh: 'np. Gwiezdny', optIn: 'Mam co najmniej 16 lat (18 w Indiach) i chcę pokazać nick, punkty i falę w rankingu online', optFine: 'Nick, punkty i fala będą publiczne. Nie używaj imienia i nazwiska ani e-maila.',
@@ -717,11 +719,11 @@ var T = {
         ['Punkty i życia', ['Blink 30, Brumm 20, Gloppo 10 punktów.', 'Masz 3 życia. Dodatkowe życie przy 1500 punktach, potem co 5000.', 'Każda nowa fala zaczyna trochę niżej. Gra kończy się, gdy stracisz wszystkie życia albo kosmici dotrą do działa.']],
         ['Ranking online', 'Chcesz rywalizować? Wpisz nick i zaznacz „Mam co najmniej 16 lat (18 w Indiach) i chcę pokazać nick, punkty i falę w rankingu online” (domyślnie wyłączone). Wtedy po każdej grze wysyłane są nick, punkty, fala i liczba kosmitów, a ty widzisz top 50 – ogółem, dziś i w tym tygodniu. Gra działa w pełni bez rankingu. Ranking online jest tylko dla osób, które mają co najmniej 16 lat (w Indiach 18).'],
         ['Migające światła', 'Gra zawiera eksplozje i migające światła. Jeśli masz padaczkę lub jesteś wrażliwy na błyski, porozmawiaj z lekarzem przed grą i od razu zrób przerwę, jeśli poczujesz zawroty głowy lub się źle poczujesz.'],
-        ['Zapis', 'Gra zapisuje się automatycznie na tym urządzeniu, razem z twoim rekordem. Po załadowaniu strony działa też bez internetu.']],
+        ['Zapis', 'Gra zapisuje się automatycznie na tym urządzeniu, razem z twoim rekordem. Dzienna fala ma własny rekord dnia i serię, też tylko na tym urządzeniu. Po załadowaniu strony działa też bez internetu.']],
       about: 'Ufobang to autorska gra kosmiczna Stop60. Stworzona z pasji i darmowa dla wszystkich – bez reklam i bez konta.' }) },
   en: { name: 'Ufobang', tagline: 'Defend the Earth', test: 'TEST VERSION', privacy: 'Privacy', sndLbl: 'Sound', howTo: 'How to play', toMenu: 'Menu', close: 'Got it', pauseLbl: 'Pause',
     score: 'Score', wave: 'Wave', hi: 'Best', fire: 'Fire', livesLbl: 'Lives left', accuracy: 'Accuracy', waveReached: 'Wave', kills: 'Aliens',
-    continue: 'Continue game', contInfo: 'Wave {w} · {s} points · {l} lives', newGame: 'New game', newGameSub: 'Wave 1 · 3 lives', best: 'Best: {s} points · best wave: {w}', bestNone: 'No best score yet – good luck!',
+    continue: 'Continue game', contInfo: 'Wave {w} · {s} points · {l} lives', newGame: 'New game', newGameSub: 'Wave 1 · 3 lives', daily: 'Today’s wave', dailySub: 'Same for everyone today', dailyBest: 'Daily best', best: 'Best: {s} points · best wave: {w}', bestNone: 'No best score yet – good luck!',
     padHint: 'Drag your finger here', padSub: 'The cannon follows your finger and fires while you hold', btnMode: 'Buttons instead of dragging', btnModeSub: '◀ ▶ and a Fire button below the playfield',
     lb: 'Leaderboard', lbKick: 'Online', tabAll: 'Top 50', tabDay: 'Today', tabWeek: 'This week', lbSee: 'See the leaderboard', lbLoading: 'Loading…', lbEmpty: 'No scores here yet – be the first!', lbDown: 'The leaderboard can’t be reached right now. The game works as usual.',
     lbNote: 'Best score per nickname.', lbWaveN: 'wave {w}', nickLbl: 'Nickname', nickPh: 'e.g. StarGuard', optIn: 'I am 16 or older (18 or older in India) and want my nickname, score and wave shown on the online leaderboard', optFine: 'Nickname, score and wave become public. Don’t use your real name or e-mail.',
@@ -744,7 +746,7 @@ var T = {
         ['Points and lives', ['Blink 30, Brumm 20 and Gloppo 10 points.', 'You have 3 lives. Extra life at 1,500 points, then every 5,000.', 'Each new wave starts a little lower. The game is over when you lose all lives or the aliens reach your cannon.']],
         ['Online leaderboard', 'Want to compete? Enter a nickname and tick “I am 16 or older (18 or older in India) and want my nickname, score and wave shown on the online leaderboard” (it is off until you switch it on). Your nickname, score, wave and number of aliens are then posted after each game, and you can see the top 50 – all time, today and this week. The game works fully without the leaderboard. The online leaderboard is only for players aged 16 or over (18 or over in India).'],
         ['Flashing lights', 'The game has explosions and flashing lights. If you have epilepsy or are sensitive to flashing light, talk to a doctor before playing, and take a break straight away if you feel dizzy or unwell.'],
-        ['Saving', 'The game saves itself on your device, together with your best score. Once the page has loaded, it also works offline.']],
+        ['Saving', 'The game saves itself on your device, together with your best score. Today’s wave keeps its own daily best and a streak, also only on this device. Once the page has loaded, it also works offline.']],
       about: 'Ufobang is an original space game by Stop60. Made with passion and free for everyone – no ads and no account.' }) }
 };
 function t(k, o) { var s = (TILT.L[prefs.lang] && TILT.L[prefs.lang][k]) || (T[prefs.lang] && T[prefs.lang][k]) || T.no[k] || k; if (o) for (var x in o) s = s.split('{' + x + '}').join(o[x]); return s; }
@@ -777,7 +779,25 @@ try { var st0 = JSON.parse(localStorage.getItem(STAT_KEY) || 'null'); if (st0) f
 function saveStats() { try { localStorage.setItem(STAT_KEY, JSON.stringify(stats)); } catch (e) {} }
 function saveGame() { if (!g || g.over) return; try { localStorage.setItem(SAVE_KEY, SK.snapshot(g)); } catch (e) {} }
 function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) {} }
-function loadSave() { try { var s = localStorage.getItem(SAVE_KEY); return s ? SK.restore(s) : null; } catch (e) { return null; } }
+function loadSave() { try { var s = localStorage.getItem(SAVE_KEY); return demoteStaleDaily(s ? SK.restore(s) : null); } catch (e) { return null; } }
+function todayKey() { var d = new Date(); return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate(); } // local calendar date, same formula as Lavakule
+function yesterdayKey() { var y = new Date(); y.setDate(y.getDate() - 1); return y.getFullYear() * 10000 + (y.getMonth() + 1) * 100 + y.getDate(); }
+function demoteStaleDaily(gg) { if (gg && gg.daily && (gg.dailyKey | 0) !== todayKey()) { gg.daily = false; gg.dailyKey = 0; } return gg; } // yesterday's leftover is a normal run
+function recordDaily(gg) { // local best + streak only; once per local day. Not called for a continued run that is no longer today's daily.
+  if (!gg || !gg.daily || (gg.dailyKey | 0) !== todayKey()) return null;
+  var key = 'ufobang_daily_' + (gg.dailyKey | 0), prev = 0;
+  try { prev = parseInt(localStorage.getItem(key), 10) || 0; } catch (e) {}
+  var best = Math.max(prev, gg.score | 0);
+  try { localStorage.setItem(key, String(best)); } catch (e2) {}
+  var st = lsJSON('ufobang_daily_streak_v1', {});
+  if (!st || typeof st !== 'object' || Array.isArray(st)) st = {};
+  if (st.last !== (gg.dailyKey | 0)) {
+    var cur = st.last === yesterdayKey() ? ((st.cur | 0) + 1) : 1;
+    st = { last: gg.dailyKey | 0, cur: cur, best: Math.max(st.best | 0, cur) };
+    lsPut('ufobang_daily_streak_v1', st);
+  }
+  return { best: best, cur: st.cur | 0 };
+}
 var input = { left: false, right: false, fire: false, targetX: null, follow: false };
 var keys = { left: false, right: false, fire: false }, btn = { left: false, right: false, fire: false }, drag = null;
 
@@ -1057,7 +1077,11 @@ function toast(s) { var el = $('toast'); el.textContent = s; el.classList.add('s
 /* ---------------- game flow ---------------- */
 function startGame(fresh, wave, opts) {window.StopWisdom&&StopWisdom.hide();
   TILT.ensure(tiltMsg); TILT.calibrate(); audioInit(); hideAll();
-  if (fresh || !g) { g = SK.create({ seed: DEBUG && /[?&]seed=(\d+)/.test(location.search) ? +RegExp.$1 : Date.now(), wave: wave || 1 }); stats.games++; saveStats(); track('start'); lbRunStart(g); }
+  if (fresh || !g) {
+    var dailyOn = !!(opts && opts.daily), dKey = dailyOn ? todayKey() : 0; // ?seed= is for random/debug games only and never overrides Dagens bølge
+    var seed = dailyOn ? ('ufobang-daily-' + dKey) : (DEBUG && /[?&]seed=(\d+)/.test(location.search) ? +RegExp.$1 : Date.now());
+    g = SK.create({ seed: seed, wave: wave || 1, daily: dailyOn, dailyKey: dKey }); stats.games++; saveStats(); track('start'); if (dailyOn) track('start-daily'); lbRunStart(g);
+  }
   var quick = !!(opts && opts.quick); // game-over "play again" only: back in control at once
   running = true; paused = false; acc = 0; lastTs = 0; intro = quick ? 0 : 1.1; reanchor(); bunkerCache = [];
   if (quick) hideBanner(); else banner(t('waveBanner', { w: g.wave }), t('ready'));
@@ -1068,9 +1092,10 @@ function pauseGame(show) { if (!running || paused) { if (show && running) showPa
 function resumeGame() { if (!running) return; hide('pause'); paused = false; lastTs = 0; acc = 0; if (g && g.mystery && !prefs.mute) ufoStart(); req(); }
 function showPause() { $('pTitle').textContent = t('pausedT'); show('pause'); }
 function gameOver() {
-  running = false; var newBest = g.score > stats.best; if (newBest) stats.best = g.score; stats.bestWave = Math.max(stats.bestWave, g.wave); saveStats(); clearSave();
+  running = false; demoteStaleDaily(g); var dailyInfo = recordDaily(g);
+  var newBest = g.score > stats.best; if (newBest) stats.best = g.score; stats.bestWave = Math.max(stats.bestWave, g.wave); saveStats(); clearSave();
   track('over-w' + Math.min(g.wave, 10)); var gg = g;
-  clearTimeout(overTimer); overTimer = setTimeout(function () { openOver(gg, newBest); }, 200); req();
+  clearTimeout(overTimer); overTimer = setTimeout(function () { openOver(gg, newBest, dailyInfo); }, 200); req();
 }
 
 /* ---------------- input ---------------- */
@@ -1151,6 +1176,7 @@ function openOverlay() { for (var i = OVS.length - 1; i >= 0; i--) if (!$(OVS[i]
 function openMenu() {
   if (running && !paused) pauseGame(false);
   hide('pause'); hide('win'); hide('over');
+  if (g && !g.over) demoteStaleDaily(g);
   var sv = (g && !g.over) ? g : loadSave(), cont = !!(sv && !sv.over);
   $('mContinue').hidden = !cont; if (cont) $('mContInfo').textContent = t('contInfo', { w: sv.wave, s: fmt(sv.score), l: sv.lives });
   $('mNew').classList.toggle('main', !cont);
@@ -1160,9 +1186,11 @@ function openMenu() {
 function setSw(id, on) { $(id).setAttribute('aria-checked', on ? 'true' : 'false'); }
 $('mContinue').onclick = function () { audioInit(); sfx('tap'); hide('menu'); if (!g || g.over) { g = loadSave(); if (!g) { startGame(true); return; } running = false; }
   if (g.state === 'waveEnd') { nextWave(); return; } if (running && paused) { resumeGame(); return; } startGame(false); };
-$('mNew').onclick = function () { audioInit(); sfx('tap'); if (!$('mContinue').hidden) { show('confirm'); return; } startGame(true); };
-$('cYes').onclick = function () { hide('confirm'); clearSave(); running = false; g = null; startGame(true); };
-$('cNo').onclick = function () { hide('confirm'); };
+var pendingDaily = false;
+$('mNew').onclick = function () { audioInit(); sfx('tap'); pendingDaily = false; if (!$('mContinue').hidden) { show('confirm'); return; } startGame(true); };
+$('mDaily').onclick = function () { audioInit(); sfx('tap'); pendingDaily = true; if (!$('mContinue').hidden) { show('confirm'); return; } startGame(true, 1, { daily: true }); };
+$('cYes').onclick = function () { hide('confirm'); var daily = pendingDaily; pendingDaily = false; clearSave(); running = false; g = null; startGame(true, 1, daily ? { daily: true } : undefined); };
+$('cNo').onclick = function () { pendingDaily = false; hide('confirm'); };
 function tiltMsg(k) { var el = $('tiltMsg'); el.textContent = k ? t(k) : ''; el.hidden = !k; }
 function updTilt() { setSw('mTilt', TILT.on); $('mCal').hidden = !TILT.on; }
 TILT.onchange = updTilt;
@@ -1180,7 +1208,7 @@ $('menuBtn').onclick = openMenu;
 $('pauseBtn').onclick = function () { if (running && !paused) pauseGame(true); else if (running && paused && $('pause').hidden && openOverlay() === null) showPause(); };
 $('muteBtn').onclick = function () { prefs.mute = !prefs.mute; savePrefs(); audioInit(); updMute(); };
 $('langBtn').onclick = function () { prefs.lang = LANGS[(LANGS.indexOf(prefs.lang) + 1) % LANGS.length]; savePrefs(); applyLang(); paintShareQr(); lastHud = ''; updHud();
-  if (!$('menu').hidden) openMenu(); if (!$('win').hidden) fillWin(); if (!$('over').hidden && lastOver) fillOver(lastOver[0], lastOver[1]); if (!$('pause').hidden) showPause(); };
+  if (!$('menu').hidden) openMenu(); if (!$('win').hidden) fillWin(); if (!$('over').hidden && lastOver) fillOver(lastOver[0], lastOver[1], lastOver[2]); if (!$('pause').hidden) showPause(); };
 
 /* ---------------- share the game (QR + native share + copy) ---------------- */
 // Copyright (c) 2009 Kazuhiko Arase
@@ -1199,11 +1227,18 @@ $('sClose').onclick = function () { hide('share'); };
 $('sNative').onclick = function () { if (navigator.share) navigator.share({ title: t('name') + ' – ' + t('tagline'), text: t('name') + ' – ' + t('tagline'), url: gameURL() }).catch(function () {}); };
 $('sCopy').onclick = function () { copyText(gameURL()).then(function () { $('sCopy').textContent = t('copied'); setTimeout(function () { $('sCopy').textContent = t('copy'); }, 1600); }); };
 
-/* share the score as a spoiler-free emoji bar (waves reached), like Ren logikk. Public language path, no query, no UTM. */
-function scoreSharePath() { return 'stop60.no/ufobang' + ({ en: '/en', pl: '/pl' }[prefs.lang] || ''); }
+/* share the score as a spoiler-free emoji bar (waves reached). Canonical stop60.no/ufobang, no query, no UTM, no /en/ or /pl/. */
+function scoreSharePath() { return 'stop60.no/ufobang'; }
 function scoreShareURL() { return 'https://' + scoreSharePath() + '/'; }
 function scoreEmojiBar(n, ch) { n = Math.max(0, Math.floor(+n || 0)); if (n <= 0) return '\u2B1B'; if (n <= 10) return new Array(n + 1).join(ch); return new Array(11).join(ch) + '\u00d7' + n; }
-function scoreShareText() { var b = $('oScoreShare'), sc = b && b.getAttribute('data-score'), w = b && b.getAttribute('data-wave'); if (sc == null || sc === '') sc = (g && g.score != null) ? g.score : 0; if (w == null || w === '') w = (g && g.wave != null) ? g.wave : 0; return t('name') + '\n' + scoreEmojiBar(w, '\uD83D\uDEF8') + '\n' + sc + '\n' + scoreSharePath(); }
+function scoreShareText() {
+  var b = $('oScoreShare'), sc = b && b.getAttribute('data-score'), w = b && b.getAttribute('data-wave');
+  if (sc == null || sc === '') sc = (g && g.score != null) ? g.score : 0; if (w == null || w === '') w = (g && g.wave != null) ? g.wave : 0;
+  var daily = !!(b && b.getAttribute('data-daily') === '1'), streak = b ? (+b.getAttribute('data-streak') || 0) : 0;
+  var lines = [t('name') + (daily ? ' – ' + t('daily') : ''), scoreEmojiBar(w, '\uD83D\uDEF8'), String(sc)];
+  if (daily && streak > 0) lines.push('\uD83D\uDD25 ' + streak);
+  lines.push(scoreSharePath()); return lines.join('\n');
+}
 function paintOverGrid() { var grid = $('overGrid'); if (!grid) return; grid.textContent = scoreShareText(); grid.hidden = false; }
 
 (function () {
@@ -1235,14 +1270,17 @@ $('wMenu').onclick = function () { hide('win'); openMenu(); };
 
 /* ---------------- game over ---------------- */
 var lastOver = null;
-function fillOver(gg, newBest) {
+function fillOver(gg, newBest, dailyInfo) {
   $('overTitle').textContent = t('overTitle'); $('overTxt').textContent = t(gg.overReason === 'invasion' ? 'overInv' : 'overLives');
   $('osScore').textContent = fmt(gg.score); $('osWave').textContent = gg.wave; $('osKills').textContent = gg.kills;
   $('overBest').textContent = newBest ? t('newBest', { s: fmt(gg.score) }) : t('bestIs', { s: fmt(stats.best) });
-  $('oScoreShare').textContent = t('shareScore'); $('oScoreShare').setAttribute('data-score', String(gg.score)); $('oScoreShare').setAttribute('data-wave', String(gg.wave)); paintOverGrid();
+  var od = $('overDaily');
+  if (od) { if (dailyInfo) { var line = t('dailyBest') + ': ' + fmt(dailyInfo.best); if (dailyInfo.cur > 0) line += ' · \uD83D\uDD25 ' + dailyInfo.cur; od.textContent = line; od.hidden = false; } else { od.textContent = ''; od.hidden = true; } }
+  $('oScoreShare').textContent = t('shareScore'); $('oScoreShare').setAttribute('data-score', String(gg.score)); $('oScoreShare').setAttribute('data-wave', String(gg.wave));
+  $('oScoreShare').setAttribute('data-daily', dailyInfo ? '1' : ''); $('oScoreShare').setAttribute('data-streak', dailyInfo && dailyInfo.cur > 0 ? String(dailyInfo.cur) : '0'); paintOverGrid();
 }
-function openOver(gg, newBest) { dragEnd(); lastOver = [gg, newBest]; fillOver(gg, newBest); hideAll(); show('over'); onlineOver(gg); if (newBest) confetti(); }
-$('oAgain').onclick = function () { audioInit(); hide('over'); g = null; startGame(true, 1, { quick: true }); };
+function openOver(gg, newBest, dailyInfo) { dragEnd(); lastOver = [gg, newBest, dailyInfo || null]; fillOver(gg, newBest, dailyInfo || null); hideAll(); show('over'); onlineOver(gg); if (newBest) confetti(); }
+$('oAgain').onclick = function () { audioInit(); hide('over'); var againDaily = !!(g && g.daily && (g.dailyKey | 0) === todayKey()); g = null; startGame(true, 1, againDaily ? { quick: true, daily: true } : { quick: true }); };
 $('oMenu').onclick = function () { hide('over'); g = null; openMenu(); };
 
 /* ---------------- confetti (wave cleared / new best) ---------------- */
@@ -1378,7 +1416,7 @@ $('lNick').onchange = function () { var n = cleanNick($('lNick').value), er = ni
 $('lNick').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); $('lNick').blur(); } });
 setTimeout(lbFlush, 3000);
 /* ---------------- analytics (launch build only): GoatCounter, cookie-free, self-hosted count.js (ISC) ----------------
-   same setup as the other Stop60 games: one page view per load (/ufobang/, /ufobang/pl/, /ufobang/en/) + events ufobang-start, ufobang-wave-<n> (wave n cleared, n ≤ 10),
+   same setup as the other Stop60 games: one page view per load (/ufobang/, /ufobang/pl/, /ufobang/en/) + events ufobang-start, ufobang-start-daily (a fresh daily run, not a continued save), ufobang-wave-<n> (wave n cleared, n ≤ 10),
    ufobang-over-w<n> (game over in wave n), ufobang-share and ufobang-share-score. Events go out after a random 0–15 s delay, pending ones are flushed when the page is hidden.
    Off in test builds and with ?debug=1 (unless &gctest=1, used by tools/launchverify.js). */
 var GC_CODE = 'jtaczala-games', gcOn = LAUNCH && (!DEBUG || /[?&]gctest=1/.test(location.search)), gcPend = [];
@@ -1407,7 +1445,7 @@ if (gcOn) {
 /* ---------------- test hooks (?debug=1 only) ---------------- */
 if (DEBUG) window.SKJOLD = {
   state: function () { return g && { wave: g.wave, score: g.score, lives: g.lives, state: g.state, alive: SK.alive(g), px: g.px, fy: g.fy, over: g.over, overReason: g.overReason, shots: g.shots, mystery: !!g.mystery, bombs: g.bombs.length, kills: g.kills,
-    bunkerSolid: g.bunkers.map(SK.solidCount), running: running, paused: paused, intro: intro }; },
+    bunkerSolid: g.bunkers.map(SK.solidCount), running: running, paused: paused, intro: intro, daily: !!g.daily, dailyKey: g.dailyKey | 0, seed: g.seed >>> 0 }; },
   prefs: function () { return JSON.parse(JSON.stringify(prefs)); }, stats: function () { return JSON.parse(JSON.stringify(stats)); },
   gc: function () { return { on: gcOn, pend: gcPend.map(function (x) { return x.n; }), log: window.__gcLog || [], path: window.goatcounter && window.goatcounter.path }; },
   g: function () { return g; }, SK: SK, K: function () { return K; },
@@ -1444,6 +1482,9 @@ var rzT = 0; window.addEventListener('resize', function () { clearTimeout(rzT); 
 layout();
 try { if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout); } catch (e) {}
 openMenu();
+try { // smoke test: ?daily=1 or #daily starts today's wave (does not run on a normal visit)
+  if (/(?:[?&]daily=1(?:&|$))/.test(location.search || '') || /#daily\b/.test(location.hash || '')) setTimeout(function () { clearSave(); running = false; g = null; startGame(true, 1, { daily: true }); }, 0);
+} catch (e) {}
 if (/[?&]nobadge=1/.test(location.search)) document.querySelectorAll('.testbadge').forEach(function (b) { b.remove(); }); // clean screenshots of the test build
 if (DEBUG && !/nobadge/.test(location.search)) { var dbg = document.createElement('div'); dbg.id = 'dbg'; dbg.textContent = 'debug'; document.body.appendChild(dbg); }
 })();
