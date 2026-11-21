@@ -327,7 +327,7 @@ a{color:var(--teal)}
   <div class="tbl" id="mTbl"></div>
   <p id="mBest"></p>
   <button class="btn main" id="mContinue" hidden><span class="bt"><span data-t="continue">Continue game</span><small id="mContInfo"></small></span></button>
-  <button class="btn" id="mNew"><span class="bt"><span data-t="newGame">New game</span><small data-t="newGameSub">Wave 1 · 3 lives</small></span></button>
+  <button class="btn" id="mNew"><span class="bt"><span data-t="newGame">START</span><small data-t="newGameSub">Wave 1 · 3 lives</small></span></button>
   <button class="btn tl" id="mDaily"><span class="bt"><span data-t="daily">Today’s wave</span><small data-t="dailySub">Same for everyone today</small></span></button>
   <button class="tg" id="mAuto" role="switch" aria-checked="false"><span><span data-t="autofire">Auto-fire</span><small data-t="autofireSub">For buttons and keyboard: the cannon fires by itself</small></span><i class="sw"></i></button>
   <button class="tg" id="mBtns" role="switch" aria-checked="false"><span><span data-t="btnMode">Buttons instead of dragging</span><small data-t="btnModeSub">◀ ▶ and a Fire button below the playfield</small></span><i class="sw"></i></button>
@@ -690,7 +690,7 @@ var PTS = {
 var T = {
   no: { name: 'Ufobang', tagline: 'Forsvar jorden', test: 'TESTVERSJON', privacy: 'Personvern', sndLbl: 'Lyd', howTo: 'Slik spiller du', toMenu: 'Meny', close: 'Skjønner', pauseLbl: 'Pause',
     score: 'Poeng', wave: 'Bølge', hi: 'Rekord', fire: 'Skyt', livesLbl: 'Liv igjen', accuracy: 'Treffsikkerhet', waveReached: 'Bølge', kills: 'Romvesener',
-    continue: 'Fortsett spillet', contInfo: 'Bølge {w} · {s} poeng · {l} liv', newGame: 'Nytt spill', newGameSub: 'Bølge 1 · 3 liv', daily: 'Dagens bølge', dailySub: 'Samme for alle i dag', dailyBest: 'Dagens rekord', best: 'Rekord: {s} poeng · beste bølge: {w}', bestNone: 'Ingen rekord ennå – lykke til!',
+    continue: 'Fortsett spillet', contInfo: 'Bølge {w} · {s} poeng · {l} liv', newGame: 'START', newGameSub: 'Bølge 1 · 3 liv', daily: 'Dagens bølge', dailySub: 'Samme for alle i dag', dailyBest: 'Dagens rekord', best: 'Rekord: {s} poeng · beste bølge: {w}', bestNone: 'Ingen rekord ennå – lykke til!',
     padHint: 'Dra fingeren her', padSub: 'Kanonen følger fingeren og skyter mens du holder', btnMode: 'Knapper i stedet for å dra', btnModeSub: '◀ ▶ og en Skyt-knapp under brettet',
     lb: 'Toppliste', lbKick: 'På nett', tabAll: 'Topp 50', tabDay: 'I dag', tabWeek: 'Denne uka', lbSee: 'Se topplisten', lbLoading: 'Laster …', lbEmpty: 'Ingen resultater her ennå – bli den første!', lbDown: 'Topplisten kan ikke nås akkurat nå. Spillet virker som vanlig.',
     lbNote: 'Beste resultat per kallenavn.', lbWaveN: 'bølge {w}', nickLbl: 'Kallenavn', nickPh: 'f.eks. Romvakt', optIn: 'Jeg er 16 år eller eldre (18 i India) og vil vise kallenavn, poeng og bølge på topplisten på nett', optFine: 'Kallenavn, poeng og bølge blir offentlige. Ikke bruk ekte navn eller e-post.',
@@ -717,7 +717,7 @@ var T = {
       about: 'Ufobang er et eget romspill fra Stop60. Laget med lidenskap og gratis for alle – ingen reklame og ingen konto.' }) },
   pl: { name: 'Ufobang', tagline: 'Obroń Ziemię', test: 'WERSJA TESTOWA', privacy: 'Prywatność', sndLbl: 'Dźwięk', howTo: 'Jak grać', toMenu: 'Menu', close: 'Rozumiem', pauseLbl: 'Pauza',
     score: 'Punkty', wave: 'Fala', hi: 'Rekord', fire: 'Strzał', livesLbl: 'Życia', accuracy: 'Celność', waveReached: 'Fala', kills: 'Kosmici',
-    continue: 'Kontynuuj grę', contInfo: 'Fala {w} · {s} pkt · życia: {l}', newGame: 'Nowa gra', newGameSub: 'Fala 1 · 3 życia', daily: 'Dzienna fala', dailySub: 'Ta sama dla wszystkich dziś', dailyBest: 'Rekord dnia', best: 'Rekord: {s} pkt · najlepsza fala: {w}', bestNone: 'Jeszcze bez rekordu – powodzenia!',
+    continue: 'Kontynuuj grę', contInfo: 'Fala {w} · {s} pkt · życia: {l}', newGame: 'START', newGameSub: 'Fala 1 · 3 życia', daily: 'Dzienna fala', dailySub: 'Ta sama dla wszystkich dziś', dailyBest: 'Rekord dnia', best: 'Rekord: {s} pkt · najlepsza fala: {w}', bestNone: 'Jeszcze bez rekordu – powodzenia!',
     padHint: 'Przesuwaj palcem tutaj', padSub: 'Działo podąża za palcem i strzela, gdy trzymasz', btnMode: 'Przyciski zamiast przesuwania', btnModeSub: '◀ ▶ i przycisk Strzał pod planszą',
     lb: 'Ranking', lbKick: 'Online', tabAll: 'Top 50', tabDay: 'Dziś', tabWeek: 'Ten tydzień', lbSee: 'Zobacz ranking', lbLoading: 'Wczytuję…', lbEmpty: 'Jeszcze brak wyników – bądź pierwszy!', lbDown: 'Ranking jest teraz niedostępny. Gra działa normalnie.',
     lbNote: 'Najlepszy wynik każdego nicku.', lbWaveN: 'fala {w}', nickLbl: 'Nick', nickPh: 'np. Gwiezdny', optIn: 'Mam co najmniej 16 lat (18 w Indiach) i chcę pokazać nick, punkty i falę w rankingu online', optFine: 'Nick, punkty i fala będą publiczne. Nie używaj imienia i nazwiska ani e-maila.',
@@ -725,10 +725,10 @@ var T = {
     needOpt: 'Najpierw zaznacz pole rankingu.', lbNoScore: 'W tej rundzie nie ma punktów do wysłania.', lbOffHint: 'Chcesz dołączyć? Wpisz nick i zaznacz pole – wynik będzie wysyłany po każdej grze.', lbOnHint: 'Bierzesz udział: wynik jest wysyłany po każdej grze.',
     nickShort: 'Wpisz nick (2–16 znaków).', nickChars: 'Dozwolone: litery, cyfry, spacja i . _ \' - (na początku litera lub cyfra).', nickBad: 'Ten nick jest niedozwolony – wybierz inny.',
     autofire: 'Autostrzał', autofireSub: 'Przy przyciskach i klawiaturze: działo strzela samo', free: 'Stworzone z pasji – za darmo dla wszystkich',
-    qrLabel: 'Zeskanuj i graj', qrShare: 'Zeskanuj i graj – podaj dalej', share: 'Udostępnij grę', shareScore: 'Udostępnij wynik', shareScoreTxt: 'Zrobiłem {score} pkt w Ufobang – pobijesz? {url}', shareScoreOk: 'Skopiowano!', shareTxt: 'Zeskanuj kod aparatem telefonu, aby otworzyć grę.', shareBtn: 'Udostępnij…', copy: 'Kopiuj link', copied: 'Skopiowano!', close2: 'Zamknij',
+    qrLabel: 'Zeskanuj i zagraj', qrShare: 'Zeskanuj i zagraj – podaj dalej', share: 'Udostępnij grę', shareScore: 'Udostępnij wynik', shareScoreTxt: 'Mam {score} pkt w Ufobang – pobijesz mój wynik? {url}', shareScoreOk: 'Skopiowano!', shareTxt: 'Zeskanuj kod aparatem telefonu, aby otworzyć grę.', shareBtn: 'Udostępnij…', copy: 'Kopiuj link', copied: 'Skopiowano!', close2: 'Zamknij',
     paused: 'Pauza', pausedT: 'Gra wstrzymana', resume: 'Graj dalej',
     waveBanner: 'Fala {w}', ready: 'Przygotuj się!', cleared: 'Fala {w} odparta!', winTxt: 'Ziemia jest bezpieczna – na razie. Następna fala zacznie trochę niżej i będzie strzelać częściej.', nextWave: 'Następna fala', nextSub: 'Fala {w}',
-    newBest: 'Nowy rekord: {s} pkt!', bestIs: 'Rekord: {s} pkt', overTitle: 'Koniec gry', overInv: 'Kosmici wylądowali – Ziemia czeka na nowego bohatera.', overLives: 'Działo zostało zniszczone. Spróbuj jeszcze raz – z każdą rundą idzie lepiej!',
+    newBest: 'Nowy rekord: {s} pkt!', bestIs: 'Rekord: {s} pkt', overTitle: 'Koniec gry', overInv: 'Kosmici wylądowali – Ziemia czeka na nowego bohatera.', overLives: 'Działo zostało zniszczone. Spróbuj jeszcze raz – z każdą rundą pójdzie lepiej!',
     again: 'Zagraj ponownie', confirmNew: 'Zacząć nową grę? Bieżąca gra przepadnie.', no: 'Nie', yes: 'Tak', extraLife: 'Dodatkowe życie!', mysteryPts: 'Czerwona Manta: +{p}', mantaShort: 'Manta', lifeLost: 'Trafienie!',
     kbd: '<kbd>←</kbd><kbd>→</kbd> ruch · <kbd>Spacja</kbd> strzał · <kbd>P</kbd> pauza · <kbd>M</kbd> dźwięk', p: 'pkt', fieldLbl: 'Plansza: kosmici u góry, zielone osłony i działo laserowe na dole',
     rulesHtml: rules({ name: 'Ufobang', h: 'Jak grać', manta: 'Czerwona Manta', p: 'pkt',
@@ -744,7 +744,7 @@ var T = {
       about: 'Ufobang to autorska gra kosmiczna Stop60. Stworzona z pasji i darmowa dla wszystkich – bez reklam i bez konta.' }) },
   en: { name: 'Ufobang', tagline: 'Defend the Earth', test: 'TEST VERSION', privacy: 'Privacy', sndLbl: 'Sound', howTo: 'How to play', toMenu: 'Menu', close: 'Got it', pauseLbl: 'Pause',
     score: 'Score', wave: 'Wave', hi: 'Best', fire: 'Fire', livesLbl: 'Lives left', accuracy: 'Accuracy', waveReached: 'Wave', kills: 'Aliens',
-    continue: 'Continue game', contInfo: 'Wave {w} · {s} points · {l} lives', newGame: 'New game', newGameSub: 'Wave 1 · 3 lives', daily: 'Today’s wave', dailySub: 'Same for everyone today', dailyBest: 'Daily best', best: 'Best: {s} points · best wave: {w}', bestNone: 'No best score yet – good luck!',
+    continue: 'Continue game', contInfo: 'Wave {w} · {s} points · {l} lives', newGame: 'START', newGameSub: 'Wave 1 · 3 lives', daily: 'Today’s wave', dailySub: 'Same for everyone today', dailyBest: 'Daily best', best: 'Best: {s} points · best wave: {w}', bestNone: 'No best score yet – good luck!',
     padHint: 'Drag your finger here', padSub: 'The cannon follows your finger and fires while you hold', btnMode: 'Buttons instead of dragging', btnModeSub: '◀ ▶ and a Fire button below the playfield',
     lb: 'Leaderboard', lbKick: 'Online', tabAll: 'Top 50', tabDay: 'Today', tabWeek: 'This week', lbSee: 'See the leaderboard', lbLoading: 'Loading…', lbEmpty: 'No scores here yet – be the first!', lbDown: 'The leaderboard can’t be reached right now. The game works as usual.',
     lbNote: 'Best score per nickname.', lbWaveN: 'wave {w}', nickLbl: 'Nickname', nickPh: 'e.g. StarGuard', optIn: 'I am 16 or older (18 or older in India) and want my nickname, score and wave shown on the online leaderboard', optFine: 'Nickname, score and wave become public. Don’t use your real name or e-mail.',
